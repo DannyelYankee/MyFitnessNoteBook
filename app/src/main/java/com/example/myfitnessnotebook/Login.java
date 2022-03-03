@@ -1,40 +1,20 @@
 package com.example.myfitnessnotebook;
 
-import android.os.Bundle;
-
-import com.google.android.material.snackbar.Snackbar;
-
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.view.View;
+import android.os.Bundle;
 import android.widget.EditText;
 
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
-
-
 public class Login extends AppCompatActivity {
-
-    EditText user;
-    EditText password;
+    EditText userName, password;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        user = (EditText) findViewById(R.id.username);
-        password =(EditText) findViewById(R.id.password);
+        setContentView(R.layout.activity_login);
 
-        login(user.toString(), password.toString());
+        userName = (EditText) findViewById(R.id.username);
+        password = (EditText) findViewById(R.id.password);
 
-    }
-    public boolean login (String user, String password){
-        boolean exito = false;
-
-
-
-        return exito;
 
     }
 }
