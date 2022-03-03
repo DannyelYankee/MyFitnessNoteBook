@@ -3,8 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/Daniel/AndroidStudioProjects/MyFitnessNoteBook/app/src/main/res/layout/activity_login.xml" value="0.33" />
+        <entry key="..\:/Users/Daniel/AndroidStudioProjects/MyFitnessNoteBook/app/src/main/res/layout-w1240dp/activity_login.xml" value="0.12985274431057564" />
+        <entry key="..\:/Users/Daniel/AndroidStudioProjects/MyFitnessNoteBook/app/src/main/res/layout-w936dp/activity_login.xml" value="0.1515625" />
+        <entry key="..\:/Users/Daniel/AndroidStudioProjects/MyFitnessNoteBook/app/src/main/res/layout/activity_login.xml" value="0.2232273838630807" />
+        <entry key="..\:/Users/Daniel/AndroidStudioProjects/MyFitnessNoteBook/app/src/main/res/layout/activity_login2.xml" value="0.20208333333333334" />
         <entry key="..\:/Users/Daniel/AndroidStudioProjects/MyFitnessNoteBook/app/src/main/res/layout/activity_main.xml" value="0.20052083333333334" />
+        <entry key="..\:/Users/Daniel/AndroidStudioProjects/MyFitnessNoteBook/app/src/main/res/layout/login.xml" value="0.27853260869565216" />
       </map>
     </option>
   </component>
