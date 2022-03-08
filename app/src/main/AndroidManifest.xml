@@ -10,24 +10,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyFitnessNoteBook">
         <activity
+            android:name=".addEjercicio"
+            android:exported="false"
+            android:label="@string/title_activity_add_ejercicio"
+            android:theme="@style/Theme.MyFitnessNoteBook.NoActionBar" />
+        <activity
             android:name=".Login"
             android:exported="false"
             android:label="@string/title_activity_login"
             android:theme="@style/Theme.MyFitnessNoteBook.NoActionBar" />
         <activity
-            android:name=".ui.login.LoginActivity"
+            android:name=".addRoutine"
             android:exported="false"
-            android:label="@string/title_activity_login" />
-        <activity
-            android:name=".LoginActivity"
-            android:exported="false"
-            android:label="@string/title_activity_login"
+            android:label="@string/title_activity_add_routine"
             android:theme="@style/Theme.MyFitnessNoteBook.NoActionBar" />
-        <activity
-            android:name=".data.LoginActivity"
-            android:exported="false"
-            android:label="@string/title_activity_login"
-            android:theme="@style/Theme.MyFitnessNoteBook.NoActionBar" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">

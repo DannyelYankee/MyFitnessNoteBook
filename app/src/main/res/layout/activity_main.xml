@@ -28,7 +28,7 @@
         android:contentDescription="@string/app_name"
         android:backgroundTint="@android:color/darker_gray"
         app:borderWidth="0dp"
-        app:srcCompat="@android:drawable/ic_menu_camera" />
+        app:srcCompat="@android:drawable/ic_menu_delete" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab1"
@@ -39,7 +39,7 @@
         android:contentDescription="@string/app_name"
         android:backgroundTint="@android:color/darker_gray"
         app:borderWidth="0dp"
-        app:srcCompat="@android:drawable/ic_dialog_map" />
+        app:srcCompat="@android:drawable/ic_input_add" />
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -64,12 +64,14 @@
         android:text="Iniciar Sesión" />
 
     <ListView
-        android:layout_width="207dp"
-        android:layout_height="394dp"
-        android:id="@+id/listView"
+        android:id="@+id/listViewRutinas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="200dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
 
         />
-
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
