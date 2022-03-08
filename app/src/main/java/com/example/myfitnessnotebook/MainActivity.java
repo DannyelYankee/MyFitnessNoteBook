@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
             String rutina = data.getStringExtra("rutina");
             System.out.println(rutina);
             rutinas.add(rutina);
-            arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
+            arrayAdapter = new ArrayAdapter(MainActivity.this, R.layout.listview_rutinas, rutinas);
             listView.setAdapter(arrayAdapter);
         }
     }
