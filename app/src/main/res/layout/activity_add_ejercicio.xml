@@ -79,29 +79,32 @@
         android:id="@+id/peso"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:layout_marginTop="184dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="502dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="44dp"
         android:hint="Peso en kg"
         android:minHeight="48dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/repeticiones"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintBottom_toTopOf="@+id/btn_addEjer"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btn_addEjer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="108dp"
         android:backgroundTint="@android:color/darker_gray"
         android:text="Añadir"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/series" />
+
+    <TextView
+        android:id="@+id/currentNumEjer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="9dp"
+        app:layout_constraintStart_toEndOf="@+id/numEjer"
+        app:layout_constraintTop_toBottomOf="@+id/nombreRutina" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

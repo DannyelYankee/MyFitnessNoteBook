@@ -28,10 +28,11 @@ public class addRoutine extends AppCompatActivity {
             public void onClick(View view) {
                 EditText nombreRutina = (EditText) findViewById(R.id.addRoutine_nombreRutina);
                 Intent i = new Intent();
-                i.putExtra("rutina",nombreRutina.getText().toString());
-                setResult(Activity.RESULT_OK,i);
+                i.putExtra("rutina", nombreRutina.getText().toString());
+                setResult(Activity.RESULT_OK, i);
                 finish();
             }
         });
+
     }
 }

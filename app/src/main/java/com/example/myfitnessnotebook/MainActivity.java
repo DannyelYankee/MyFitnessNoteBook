@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
     FloatingActionButton fab;
@@ -23,7 +25,9 @@ public class MainActivity extends AppCompatActivity {
     Button btnLogin;
     ListView listView;
     ArrayList<String> rutinas;
+    HashMap<String, Integer> hashRutinas;
     ArrayAdapter arrayAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Toast.makeText(MainActivity.this, "Añadir nuevo entrenamiento", Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(MainActivity.this, addRoutine.class);
-                startActivityForResult(i,1);
+                startActivityForResult(i, 1);
                 closeFABMenu();
             }
         });
@@ -62,27 +66,47 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 startActivity(iLogin);
-                finish();
             }
         });
 
         /*List view para mostrar las rutinas creadas dinamicamente*/
         listView = findViewById(R.id.listViewRutinas);
         rutinas = new ArrayList<>();
+        hashRutinas = new HashMap<>();
 
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                String nombreRutina = rutinas.get(i);
+                Toast.makeText(MainActivity.this, "Pulsaste " + nombreRutina, Toast.LENGTH_SHORT).show();
+                if(hashRutinas.get(nombreRutina)==0){
+                    Intent iEjercicio = new Intent(MainActivity.this, addEjercicio.class);
+                    iEjercicio.putExtra("nombreRutina", nombreRutina);
+                    iEjercicio.putExtra("numEjer", hashRutinas.get(nombreRutina).toString());
+                    startActivity(iEjercicio);
+                }else{
+                    Toast.makeText(MainActivity.this, "Se abrira ver/editar rutina", Toast.LENGTH_SHORT).show();
+                }
+
+
+            }
+        });
 
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==1 && resultCode == RESULT_OK){
+        if (requestCode == 1 && resultCode == RESULT_OK) {
             String rutina = data.getStringExtra("rutina");
             System.out.println(rutina);
             rutinas.add(rutina);
+            hashRutinas.put(rutina, 0);
             arrayAdapter = new ArrayAdapter(MainActivity.this, R.layout.listview_rutinas, rutinas);
             listView.setAdapter(arrayAdapter);
         }
     }
+
     private void showFABMenu() {
         isFABOpen = true;
         fab1.animate().translationY(-getResources().getDimension(R.dimen.standard_75));
