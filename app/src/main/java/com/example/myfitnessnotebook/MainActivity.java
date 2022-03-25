@@ -3,6 +3,8 @@ package com.example.myfitnessnotebook;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -27,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> rutinas;
     HashMap<String, Integer> hashRutinas;
     ArrayAdapter arrayAdapter;
+    miBD gestorBD;
+    SQLiteDatabase bd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(iLogin);
+                startActivityForResult(iLogin, 2);
             }
         });
 
@@ -74,18 +78,26 @@ public class MainActivity extends AppCompatActivity {
         rutinas = new ArrayList<>();
         hashRutinas = new HashMap<>();
 
+        gestorBD = gestorBD = new miBD(this, "MyFitnessNotebook", null, 1);
+        SQLiteDatabase bd = gestorBD.getWritableDatabase();
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 String nombreRutina = rutinas.get(i);
                 Toast.makeText(MainActivity.this, "Pulsaste " + nombreRutina, Toast.LENGTH_SHORT).show();
-                if(hashRutinas.get(nombreRutina)==0){
+                if (hashRutinas.get(nombreRutina) == 0) {
                     Intent iEjercicio = new Intent(MainActivity.this, addEjercicio.class);
                     iEjercicio.putExtra("nombreRutina", nombreRutina);
                     iEjercicio.putExtra("numEjer", hashRutinas.get(nombreRutina).toString());
-                    startActivity(iEjercicio);
-                }else{
+                    startActivityForResult(iEjercicio, 777);
+
+                } else {
                     Toast.makeText(MainActivity.this, "Se abrira ver/editar rutina", Toast.LENGTH_SHORT).show();
+                    Intent iVerEditar = new Intent(MainActivity.this, VerEditarRutina.class);
+                    iVerEditar.putExtra("nombreRutina", nombreRutina);
+                    startActivity(iVerEditar);
+                    finish();
                 }
 
 
@@ -100,11 +112,24 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 1 && resultCode == RESULT_OK) {
             String rutina = data.getStringExtra("rutina");
             System.out.println(rutina);
-            rutinas.add(rutina);
             hashRutinas.put(rutina, 0);
             arrayAdapter = new ArrayAdapter(MainActivity.this, R.layout.listview_rutinas, rutinas);
             listView.setAdapter(arrayAdapter);
         }
+        if (requestCode == 777 && resultCode == RESULT_OK) { //se ha añadido el primer ejer a la rutina
+            String rutina = data.getStringExtra("rutina");
+            hashRutinas.put(rutina, hashRutinas.get(rutina) + 1);
+        }
+    }
+
+    public void getRutinas() {
+        Cursor c = bd.query("Rutinas", null, null, null, null, null, null, null);
+        while (c.moveToNext()) {
+            String nombre = c.getString(1);
+            rutinas.add(nombre);
+        }
+
+
     }
 
     private void showFABMenu() {

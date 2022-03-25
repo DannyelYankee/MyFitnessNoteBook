@@ -2,6 +2,8 @@ package com.example.myfitnessnotebook;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,7 +20,7 @@ public class addEjercicio extends AppCompatActivity {
     TextView numEjer;
     EditText nombreEjer, series, repeticiones, peso;
     Button btn_addEjer;
-
+    miBD gestorBD;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,6 +37,22 @@ public class addEjercicio extends AppCompatActivity {
         nombreRutina.setText(nombreRutinaExtra);
         String numEjerExtra = getIntent().getStringExtra("numEjer");
         numEjer.setText(numEjerExtra);
+
+    }
+    public SQLiteDatabase getBD(){
+        gestorBD = new miBD(this,"MyFitnessNotebook",null,1);
+        SQLiteDatabase bd = gestorBD.getWritableDatabase();
+        return bd;
+    }
+    public void agregarEjercicio(){
+        ContentValues values = new ContentValues();
+        values.put("nombre",nombreEjer.getText().toString());
+        values.put("numSeries",series.getText().toString());
+        values.put("numRepes",repeticiones.getText().toString());
+        values.put("peso",peso.getText().toString());
+        values.put("rutina",nombreRutina.getText().toString());
+        SQLiteDatabase bd = this.getBD();
+        bd.insert("Ejercicios",null,values);
 
     }
 }

@@ -10,6 +10,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyFitnessNoteBook">
         <activity
+            android:name=".VerEditarRutina"
+            android:exported="false" />
+        <activity
+            android:name=".SignUpActivity"
+            android:exported="false" />
+        <activity
             android:name=".addEjercicio"
             android:exported="false"
             android:label="@string/title_activity_add_ejercicio"
@@ -24,7 +30,6 @@
             android:exported="false"
             android:label="@string/title_activity_add_routine"
             android:theme="@style/Theme.MyFitnessNoteBook.NoActionBar" />
-
         <activity
             android:name=".MainActivity"
             android:exported="true">
