@@ -2,9 +2,12 @@ package com.example.myfitnessnotebook;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -21,6 +24,7 @@ public class addEjercicio extends AppCompatActivity {
     EditText nombreEjer, series, repeticiones, peso;
     Button btn_addEjer;
     miBD gestorBD;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,21 +42,21 @@ public class addEjercicio extends AppCompatActivity {
         String numEjerExtra = getIntent().getStringExtra("numEjer");
         numEjer.setText(numEjerExtra);
 
-    }
-    public SQLiteDatabase getBD(){
-        gestorBD = new miBD(this,"MyFitnessNotebook",null,1);
-        SQLiteDatabase bd = gestorBD.getWritableDatabase();
-        return bd;
-    }
-    public void agregarEjercicio(){
-        ContentValues values = new ContentValues();
-        values.put("nombre",nombreEjer.getText().toString());
-        values.put("numSeries",series.getText().toString());
-        values.put("numRepes",repeticiones.getText().toString());
-        values.put("peso",peso.getText().toString());
-        values.put("rutina",nombreRutina.getText().toString());
-        SQLiteDatabase bd = this.getBD();
-        bd.insert("Ejercicios",null,values);
+        btn_addEjer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int numSeries = Integer.parseInt(series.getText().toString());
+                String nombreEjercicio = nombreEjer.getText().toString();
+                int repes = Integer.parseInt(repeticiones.getText().toString());
+                int pesoKG = Integer.parseInt(peso.getText().toString());
+                gestorBD.agregarEjercicio(nombreEjercicio,numSeries,repes,pesoKG,nombreRutinaExtra);
+                Intent i = new Intent();
+                i.putExtra("rutina",nombreRutinaExtra);
+                setResult(Activity.RESULT_OK, i);
+                finish();
+            }
+        });
 
     }
+
 }

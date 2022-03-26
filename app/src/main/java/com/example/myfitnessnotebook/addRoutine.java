@@ -25,27 +25,26 @@ public class addRoutine extends AppCompatActivity {
     EditText nombreRutinaText;
     String nombreRutina;
     Boolean agregado = false;
-    SQLiteDatabase bd;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_routine);
         Button add = (Button) findViewById(R.id.btn_addRoutine);
-        gestorBD = new miBD(this,"MyFitnessNotebook",null,1);
-        SQLiteDatabase bd = gestorBD.getWritableDatabase();
+        gestorBD = new miBD(this, "MyFitnessNotebook", null, 1);
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 nombreRutinaText = (EditText) findViewById(R.id.addRoutine_nombreRutina);
                 nombreRutina = nombreRutinaText.getText().toString();
-                agregado = agregarRutina(nombreRutina);
-                if(agregado){
+                agregado = gestorBD.agregarRutina(nombreRutina);
+                if (agregado) {
                     Intent i = new Intent();
                     i.putExtra("rutina", nombreRutina.toString());
                     setResult(Activity.RESULT_OK, i);
                     finish();
-                }else{
-                    Toast.makeText(addRoutine.this, "Ya existe una rutina con el nombre "+nombreRutina+". Por favor pruebe con otro nombre.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(addRoutine.this, "Ya existe una rutina con el nombre " + nombreRutina + ". Por favor pruebe con otro nombre.", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -53,28 +52,5 @@ public class addRoutine extends AppCompatActivity {
 
     }
 
-    public SQLiteDatabase getBD() {
 
-        return bd;
-    }
-
-    public boolean agregarRutina(String rutina) {
-        /*Vamos a comprobar que no haya una rutina con el mismo nombre*/
-
-        String selection = "nombre = ?";
-        String selectionArgs[] = new String[]{rutina};
-        //SQLiteDatabase bd = this.getBD();
-        Cursor c = bd.query("Rutinas", null, selection, selectionArgs, null, null, null);
-        System.out.println("Select hecho");
-        if (c.moveToFirst() && c.getCount() == 0) { //No existe ninguna rutina con ese nombre
-            ContentValues values = new ContentValues();
-            values.put("nombre",rutina);
-            bd.insert("Rutinas", null, values);
-            agregado = true;
-            System.out.println("Rutina agregada");
-        }
-
-
-        return agregado;
-    }
 }

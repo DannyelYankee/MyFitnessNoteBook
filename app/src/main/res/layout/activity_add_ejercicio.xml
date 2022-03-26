@@ -82,6 +82,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginBottom="44dp"
         android:hint="Peso en kg"
+        android:inputType="number"
         android:minHeight="48dp"
         app:layout_constraintBottom_toTopOf="@+id/btn_addEjer"
         app:layout_constraintStart_toStartOf="parent" />

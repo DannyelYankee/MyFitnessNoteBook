@@ -30,12 +30,13 @@ public class MainActivity extends AppCompatActivity {
     HashMap<String, Integer> hashRutinas;
     ArrayAdapter arrayAdapter;
     miBD gestorBD;
-    SQLiteDatabase bd;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        gestorBD  = new miBD(this, "MyFitnessNotebook", null, 1);
 
         /*Menú flotante para agregar y eliminar rutinas a nuestro cuaderno*/
         fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -49,6 +50,17 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Añadir nuevo entrenamiento", Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(MainActivity.this, addRoutine.class);
                 startActivityForResult(i, 1);
+                closeFABMenu();
+            }
+        });
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MainActivity.this.deleteDatabase("MyFitnessNotebook");
+                Toast.makeText(MainActivity.this,"BBDD borrada con exito",Toast.LENGTH_SHORT).show();
+                rutinas = new ArrayList<>();
+                arrayAdapter.clear();
+                arrayAdapter.notifyDataSetChanged();
                 closeFABMenu();
             }
         });
@@ -75,23 +87,24 @@ public class MainActivity extends AppCompatActivity {
 
         /*List view para mostrar las rutinas creadas dinamicamente*/
         listView = findViewById(R.id.listViewRutinas);
-        rutinas = new ArrayList<>();
+        //rutinas = gestorBD.getRutinas();
         hashRutinas = new HashMap<>();
-
-        gestorBD = gestorBD = new miBD(this, "MyFitnessNotebook", null, 1);
-        SQLiteDatabase bd = gestorBD.getWritableDatabase();
+        rutinas = gestorBD.getRutinas();
+        this.inicializarHashMap();
+        arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
+        listView.setAdapter(arrayAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 String nombreRutina = rutinas.get(i);
                 Toast.makeText(MainActivity.this, "Pulsaste " + nombreRutina, Toast.LENGTH_SHORT).show();
+                System.out.println(nombreRutina + " --> "+hashRutinas.get(nombreRutina));
                 if (hashRutinas.get(nombreRutina) == 0) {
                     Intent iEjercicio = new Intent(MainActivity.this, addEjercicio.class);
                     iEjercicio.putExtra("nombreRutina", nombreRutina);
                     iEjercicio.putExtra("numEjer", hashRutinas.get(nombreRutina).toString());
-                    startActivityForResult(iEjercicio, 777);
-
+                    startActivityForResult(iEjercicio, 2);
                 } else {
                     Toast.makeText(MainActivity.this, "Se abrira ver/editar rutina", Toast.LENGTH_SHORT).show();
                     Intent iVerEditar = new Intent(MainActivity.this, VerEditarRutina.class);
@@ -99,11 +112,8 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(iVerEditar);
                     finish();
                 }
-
-
             }
         });
-
     }
 
     @Override
@@ -112,24 +122,25 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 1 && resultCode == RESULT_OK) {
             String rutina = data.getStringExtra("rutina");
             System.out.println(rutina);
-            hashRutinas.put(rutina, 0);
-            arrayAdapter = new ArrayAdapter(MainActivity.this, R.layout.listview_rutinas, rutinas);
+            rutinas = gestorBD.getRutinas();
+            this.inicializarHashMap();
+            arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
             listView.setAdapter(arrayAdapter);
         }
-        if (requestCode == 777 && resultCode == RESULT_OK) { //se ha añadido el primer ejer a la rutina
+        if (requestCode == 2 && resultCode == RESULT_OK) {//se ha añadido el primer ejer a la rutina
+            System.out.println("se ha añadido el primer ejer a la rutina");
             String rutina = data.getStringExtra("rutina");
             hashRutinas.put(rutina, hashRutinas.get(rutina) + 1);
+            rutinas = gestorBD.getRutinas();
+            arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
+            listView.setAdapter(arrayAdapter);
         }
     }
 
-    public void getRutinas() {
-        Cursor c = bd.query("Rutinas", null, null, null, null, null, null, null);
-        while (c.moveToNext()) {
-            String nombre = c.getString(1);
-            rutinas.add(nombre);
+    private void inicializarHashMap(){
+        for(String i: this.rutinas){
+            this.hashRutinas.put(i,0);
         }
-
-
     }
 
     private void showFABMenu() {

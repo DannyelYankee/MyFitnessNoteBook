@@ -1,10 +1,15 @@
 package com.example.myfitnessnotebook;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import androidx.annotation.Nullable;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 public class miBD extends SQLiteOpenHelper {
     //public static final int DATABASE_VERSION = 1;
@@ -34,4 +39,58 @@ public class miBD extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
 
     }
+
+    public ArrayList<String> getRutinas() {
+        ArrayList<String> rutinas = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM Rutinas";
+        Cursor c = db.rawQuery(query, null);
+        while (c.moveToNext()) {
+            int i = c.getColumnIndex("nombre");
+            String nombre = c.getString(i);
+            rutinas.add(nombre);
+        }
+        c.close();
+        return rutinas;
+    }
+
+    public boolean agregarRutina(String nombre) {
+        boolean agregado = false;
+        ArrayList<String> rutinas = this.getRutinas();
+        if(!rutinas.contains(nombre)){
+            SQLiteDatabase db = this.getWritableDatabase();
+            ContentValues values = new ContentValues();
+            values.put("nombre",nombre);
+            long newRowId = db.insert("Rutinas",null,values);
+            db.close();
+            agregado = true;
+        }
+        return agregado;
+    }
+    public ArrayList<String> getEjercicios(String rutina) {
+        ArrayList<String> ejercicios = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM Ejercicios WHERE rutina ="+rutina;
+        Cursor c = db.rawQuery(query, null);
+        while (c.moveToNext()) {
+            int i = c.getColumnIndex("nombre");
+            String nombre = c.getString(i);
+            ejercicios.add(nombre);
+        }
+        c.close();
+        return ejercicios;
+    }
+    public void agregarEjercicio(String nombreEjer, int series, int repeticiones, int peso, String nombreRutina ){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("nombre",nombreEjer);
+        values.put("numSeries",series);
+        values.put("numRepes",repeticiones);
+        values.put("peso",peso);
+        values.put("rutina",nombreRutina);
+
+        db.insert("Ejercicios",null,values);
+        db.close();
+    }
+
 }
