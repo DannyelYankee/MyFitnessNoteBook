@@ -18,7 +18,6 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 
 public class addEjercicio extends AppCompatActivity {
-    ListView listview;
     TextView nombreRutina;
     TextView numEjer;
     EditText nombreEjer, series, repeticiones, peso;
@@ -31,10 +30,7 @@ public class addEjercicio extends AppCompatActivity {
         setContentView(R.layout.activity_add_ejercicio);
         nombreRutina = (TextView) findViewById(R.id.nombreRutina);
         numEjer = (TextView) findViewById(R.id.currentNumEjer);
-        nombreEjer = (EditText) findViewById(R.id.nombreEjercicio);
-        series = (EditText) findViewById(R.id.series);
-        repeticiones = (EditText) findViewById(R.id.repeticiones);
-        peso = (EditText) findViewById(R.id.peso);
+
         btn_addEjer = (Button) findViewById(R.id.btn_addEjer);
 
         String nombreRutinaExtra = getIntent().getStringExtra("nombreRutina");
@@ -42,17 +38,26 @@ public class addEjercicio extends AppCompatActivity {
         String numEjerExtra = getIntent().getStringExtra("numEjer");
         numEjer.setText(numEjerExtra);
 
+
         btn_addEjer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                nombreEjer = (EditText) findViewById(R.id.nombreEjercicio);
+                series = (EditText) findViewById(R.id.series);
+                repeticiones = (EditText) findViewById(R.id.repeticiones);
+                peso = (EditText) findViewById(R.id.peso);
+
+
                 int numSeries = Integer.parseInt(series.getText().toString());
                 String nombreEjercicio = nombreEjer.getText().toString();
                 int repes = Integer.parseInt(repeticiones.getText().toString());
                 int pesoKG = Integer.parseInt(peso.getText().toString());
-                gestorBD.agregarEjercicio(nombreEjercicio,numSeries,repes,pesoKG,nombreRutinaExtra);
-                Intent i = new Intent();
-                i.putExtra("rutina",nombreRutinaExtra);
-                setResult(Activity.RESULT_OK, i);
+                String rutina = getIntent().getStringExtra("nombreRutina");
+
+                gestorBD.agregarEjercicio(nombreEjercicio,numSeries,repes,pesoKG,rutina);
+                Intent iBack = new Intent();
+                iBack.putExtra("rutina",nombreRutinaExtra);
+                setResult(Activity.RESULT_OK, iBack);
                 finish();
             }
         });

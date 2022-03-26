@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        gestorBD  = new miBD(this, "MyFitnessNotebook", null, 1);
+        gestorBD = new miBD(this, "MyFitnessNotebook", null, 1);
 
         /*Menú flotante para agregar y eliminar rutinas a nuestro cuaderno*/
         fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 MainActivity.this.deleteDatabase("MyFitnessNotebook");
-                Toast.makeText(MainActivity.this,"BBDD borrada con exito",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "BBDD borrada con exito", Toast.LENGTH_SHORT).show();
                 rutinas = new ArrayList<>();
                 arrayAdapter.clear();
                 arrayAdapter.notifyDataSetChanged();
@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 String nombreRutina = rutinas.get(i);
                 Toast.makeText(MainActivity.this, "Pulsaste " + nombreRutina, Toast.LENGTH_SHORT).show();
-                System.out.println(nombreRutina + " --> "+hashRutinas.get(nombreRutina));
+                System.out.println(nombreRutina + " --> " + hashRutinas.get(nombreRutina));
                 if (hashRutinas.get(nombreRutina) == 0) {
                     Intent iEjercicio = new Intent(MainActivity.this, addEjercicio.class);
                     iEjercicio.putExtra("nombreRutina", nombreRutina);
@@ -119,27 +119,31 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1 && resultCode == RESULT_OK) {
-            String rutina = data.getStringExtra("rutina");
-            System.out.println(rutina);
-            rutinas = gestorBD.getRutinas();
-            this.inicializarHashMap();
-            arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
-            listView.setAdapter(arrayAdapter);
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                String rutina = data.getStringExtra("rutina");
+                System.out.println(rutina);
+                rutinas = gestorBD.getRutinas();
+                this.inicializarHashMap();
+                arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
+                listView.setAdapter(arrayAdapter);
+            }
         }
-        if (requestCode == 2 && resultCode == RESULT_OK) {//se ha añadido el primer ejer a la rutina
-            System.out.println("se ha añadido el primer ejer a la rutina");
-            String rutina = data.getStringExtra("rutina");
-            hashRutinas.put(rutina, hashRutinas.get(rutina) + 1);
-            rutinas = gestorBD.getRutinas();
-            arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
-            listView.setAdapter(arrayAdapter);
+        if (requestCode == 2) {//se ha añadido el primer ejer a la rutina
+            if (resultCode == RESULT_OK) {
+                System.out.println("se ha añadido el primer ejer a la rutina");
+                String rutina = data.getStringExtra("rutina");
+                hashRutinas.put(rutina, hashRutinas.get(rutina) + 1);
+                rutinas = gestorBD.getRutinas();
+                arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
+                listView.setAdapter(arrayAdapter);
+            }
         }
     }
 
-    private void inicializarHashMap(){
-        for(String i: this.rutinas){
-            this.hashRutinas.put(i,0);
+    private void inicializarHashMap() {
+        for (String i : this.rutinas) {
+            this.hashRutinas.put(i, 0);
         }
     }
 
