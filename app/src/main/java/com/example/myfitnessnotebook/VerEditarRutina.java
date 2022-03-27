@@ -1,8 +1,11 @@
 package com.example.myfitnessnotebook;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SyncAdapterType;
 import android.database.Cursor;
@@ -15,6 +18,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 
@@ -24,13 +30,31 @@ public class VerEditarRutina extends AppCompatActivity {
     String rutina;
     ArrayList<String> listaEjercicios;
     ArrayAdapter arrayAdapter;
-    Button btn_otroEjer;
 
+    FloatingActionButton fab;
+    FloatingActionButton fab1;
+    FloatingActionButton fab2;
+    boolean isFABOpen;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ver_editar_rutina);
         gestorBD = new miBD(this, "MyFitnessNotebook", null, 1);
+        /*Menú flotante para agregar y eliminar ejercicios a nuestro cuaderno*/
+        fab = (FloatingActionButton) findViewById(R.id.fabVer);
+        fab1 = (FloatingActionButton) findViewById(R.id.fab1Ver);
+        fab2 = (FloatingActionButton) findViewById(R.id.fab2Ver);
+        fab.setOnClickListener(new View.OnClickListener() {
+            /*Comportamiento del botón flotante*/
+            @Override
+            public void onClick(View view) {
+                if (!isFABOpen) {
+                    showFABMenu();
+                } else {
+                    closeFABMenu();
+                }
+            }
+        });
 
 
         /*Cargamos los ejercicios de la rutina*/
@@ -54,8 +78,7 @@ public class VerEditarRutina extends AppCompatActivity {
         listView.setAdapter(arrayAdapter);
 
         /*Botón para añadir otro Ejercicio*/
-        btn_otroEjer = (Button) findViewById(R.id.btn_otroEjer);
-        btn_otroEjer.setOnClickListener(new View.OnClickListener() {
+        fab1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String nombreRutina = getIntent().getStringExtra("nombreRutina");
@@ -64,6 +87,26 @@ public class VerEditarRutina extends AppCompatActivity {
                 i.putExtra("nombreRutina", nombreRutina);
                 i.putExtra("numEjer", numEjer);
                 startActivityForResult(i, 3);
+            }
+        });
+
+        /*Botón para eliminar todos los ejercicios de la rutina de un solo golpe*/
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new AlertDialog.Builder(VerEditarRutina.this).setTitle("Eliminar todos los ejercicios").setMessage("Se eliminarán todos los ejercicios de la rutina, ¿Desea continuar?").setPositiveButton("Sí", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        ArrayList<String> todosEjercicios = gestorBD.getEjercicios(rutina);
+                        for(String ejercicio: todosEjercicios){
+                            gestorBD.eliminarEjercicio(ejercicio,rutina);
+                        }
+                        listaEjercicios.clear();
+                        arrayAdapter.notifyDataSetChanged();
+
+                    }
+                }).setNegativeButton("No",null).show();
+
             }
         });
         /*Al clickar en un item de la lista llevará al usuario a una interfaz dónde podrá Editar los datos del ejercicio*/
@@ -84,7 +127,24 @@ public class VerEditarRutina extends AppCompatActivity {
                 startActivityForResult(iVerEditar, 10);
             }
         });
+        /*Al clickar un rato en un tiem de la lista se podrá eliminar*/
 
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                int position = i;
+                new AlertDialog.Builder(VerEditarRutina.this).setTitle("Eliminar Ejercicio").setMessage("¿Deseas eliminar el ejercicio?").setPositiveButton("Sí", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Toast.makeText(VerEditarRutina.this, "Eliminose", Toast.LENGTH_SHORT).show();
+                        gestorBD.eliminarEjercicio(listaEjercicios.get(position),rutina);
+                        listaEjercicios.remove(position);
+                        arrayAdapter.notifyDataSetChanged();
+                    }
+                }).setNegativeButton("No", null).show();
+                return true;
+            }
+        });
     }
 
     @Override
@@ -142,5 +202,18 @@ public class VerEditarRutina extends AppCompatActivity {
 
             }
         }
+    }
+    private void showFABMenu() {
+        isFABOpen = true;
+        fab1.animate().translationY(-getResources().getDimension(R.dimen.standard_75));
+        fab2.animate().translationY(-getResources().getDimension(R.dimen.standard_125));
+        //fab3.animate().translationY(-getResources().getDimension(R.dimen.standard_175));
+    }
+
+    private void closeFABMenu() {
+        isFABOpen = false;
+        fab1.animate().translationY(0);
+        fab2.animate().translationY(0);
+        //fab3.animate().translationY(0);
     }
 }

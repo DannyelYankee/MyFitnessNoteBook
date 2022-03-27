@@ -118,7 +118,20 @@ public class miBD extends SQLiteOpenHelper {
         Log.i("agregarEjercicio", "agregado");
         db.close();
     }
-
+    public void eliminarEjercicio(String nombreEjer, String rutina){
+        int id = this.getID(nombreEjer,rutina);
+        SQLiteDatabase db = this.getWritableDatabase();
+        System.out.println("id de "+nombreEjer+"--->"+id);
+        db.delete("Ejercicios","id=?",new String[]{String.valueOf(id)});
+        db.close();
+    }
+    public void eliminarRutina(String rutina){
+        SQLiteDatabase db = this .getWritableDatabase();
+        /*Primero eliminamos todos los ejercicios relacionados con la rutina*/
+        db.delete("Ejercicios","rutina=?",new String[]{rutina});
+        db.delete("Rutinas","nombre=?",new String[]{rutina});
+        db.close();
+    }
     public int getID(String ejercicio, String rutina) {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM Ejercicios WHERE nombre = ? AND rutina = ?";
@@ -130,7 +143,6 @@ public class miBD extends SQLiteOpenHelper {
         }
         return id;
     }
-
     public void editarEjercicio(String nombreOriginal, String nombreEjer, int series, int repeticiones, int peso, String nombreRutina) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -142,7 +154,6 @@ public class miBD extends SQLiteOpenHelper {
         if (nombreEjer != nombreOriginal) {
             ContentValues values2 = new ContentValues();
             values2.put("nombre", nombreEjer);
-            System.out.println("id de "+nombreOriginal+"--->"+idEjercicio);
             db.update("Ejercicios", values2, "id=?", new String[]{String.valueOf(idEjercicio)});
         }
         db.close();

@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
@@ -43,23 +44,28 @@ public class addEjercicio extends AppCompatActivity {
         String nombreRutinaExtra = getIntent().getStringExtra("nombreRutina");
         nombreRutina.setText(nombreRutinaExtra);
         String numEjerExtra = getIntent().getStringExtra("numEjer");
-        numEjer.setText(numEjerExtra);
-
+        ArrayList<String> numEjercicios = gestorBD.getEjercicios(nombreRutinaExtra);
+        numEjer.setText(String.valueOf(numEjercicios.size()));
         btn_addEjer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                /*Nos aseguramos de que no haya ningún campo vacío*/
+                if (nombreEjer.getText().toString().equals("") || series.getText().toString().equals("") || repeticiones.getText().toString().equals("") || peso.getText().toString().equals("")) {
+                    Toast.makeText(addEjercicio.this, "Por favor, llene todos los campos", Toast.LENGTH_SHORT).show();
+                } else {
+                    int numSeries = Integer.parseInt(series.getText().toString());
+                    String nombreEjercicio = nombreEjer.getText().toString();
+                    int repes = Integer.parseInt(repeticiones.getText().toString());
+                    int pesoKG = Integer.parseInt(peso.getText().toString());
+                    String rutina = getIntent().getStringExtra("nombreRutina");
 
-                int numSeries = Integer.parseInt(series.getText().toString());
-                String nombreEjercicio = nombreEjer.getText().toString();
-                int repes = Integer.parseInt(repeticiones.getText().toString());
-                int pesoKG = Integer.parseInt(peso.getText().toString());
-                String rutina = getIntent().getStringExtra("nombreRutina");
 
-                gestorBD.agregarEjercicio(nombreEjercicio,numSeries,repes,pesoKG,rutina);
-                Intent iBack = new Intent();
-                iBack.putExtra("rutina",nombreRutinaExtra);
-                setResult(Activity.RESULT_OK, iBack);
-                finish();
+                    gestorBD.agregarEjercicio(nombreEjercicio, numSeries, repes, pesoKG, rutina);
+                    Intent iBack = new Intent();
+                    iBack.putExtra("rutina", nombreRutinaExtra);
+                    setResult(Activity.RESULT_OK, iBack);
+                    finish();
+                }
             }
         });
 

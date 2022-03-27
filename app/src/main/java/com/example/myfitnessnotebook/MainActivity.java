@@ -2,6 +2,8 @@ package com.example.myfitnessnotebook;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -46,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
 
         fab1.setOnClickListener(new View.OnClickListener() {
             /*Botón para añadir un entrenamiento*/
-
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(MainActivity.this, addRoutine.class);
@@ -56,14 +57,20 @@ public class MainActivity extends AppCompatActivity {
         });
         fab2.setOnClickListener(new View.OnClickListener() {
             /*Botón para borrar toda la BBDD
-            * Aparecerá un dialago para advertir de lo que va a ocurrir*/
+             * Aparecerá un dialago para advertir de lo que va a ocurrir*/
             @Override
             public void onClick(View view) {
-                MainActivity.this.deleteDatabase("MyFitnessNotebook");
-                Toast.makeText(MainActivity.this, "BBDD borrada con exito", Toast.LENGTH_SHORT).show();
-                rutinas = new ArrayList<>();
-                arrayAdapter.clear();
-                arrayAdapter.notifyDataSetChanged();
+                new AlertDialog.Builder(MainActivity.this).setTitle("Borrar toda la BBDD").setMessage("Se borrarán todos los datos de la aplicación, ¿Desea continuar?").setPositiveButton("Sí", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        MainActivity.this.deleteDatabase("MyFitnessNotebook");
+                        Toast.makeText(MainActivity.this, "BBDD borrada con exito", Toast.LENGTH_SHORT).show();
+                        rutinas = new ArrayList<>();
+                        arrayAdapter.clear();
+                        arrayAdapter.notifyDataSetChanged();
+                    }
+                }).setNegativeButton("No",null).show();
+
                 closeFABMenu();
             }
         });
@@ -110,14 +117,33 @@ public class MainActivity extends AppCompatActivity {
                     startActivityForResult(iEjercicio, 2);
                 } else {
                     /*Si la rutina ya tiene algún ejercicio se lleva al usuario a una interfaz donde aparecen listados los ejericios
-                    * y podrá añadir más ejercicios, editarlos y/o borrarlos*/
+                     * y podrá añadir más ejercicios, editarlos y/o borrarlos*/
 
                     Intent iVerEditar = new Intent(MainActivity.this, VerEditarRutina.class);
                     System.out.println(nombreRutina);
                     iVerEditar.putExtra("nombreRutina", nombreRutina);
                     iVerEditar.putExtra("numEjer", hashRutinas.get(nombreRutina).toString());
-                    startActivityForResult(iVerEditar,4);
+                    startActivityForResult(iVerEditar, 4);
                 }
+            }
+        });
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                int position = i;
+                new AlertDialog.Builder(MainActivity.this).setTitle("Eliminar rutina").setMessage("¿Deseas eliminar la rutina?").setPositiveButton("Sí", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        gestorBD.eliminarRutina(rutinas.get(position));
+                        hashRutinas.remove(rutinas.get(position));
+                        rutinas.remove(position);
+                        arrayAdapter.notifyDataSetChanged();
+                    }
+                }).setNegativeButton("No",null).show();
+
+                return true;
+
             }
         });
     }
@@ -147,8 +173,8 @@ public class MainActivity extends AppCompatActivity {
                 listView.setAdapter(arrayAdapter);
             }
         }
-        if(requestCode ==4){
-            if(resultCode == RESULT_OK){
+        if (requestCode == 4) {
+            if (resultCode == RESULT_OK) {
                 String rutina = data.getStringExtra("rutina");
                 ArrayList<String> ejercicios = gestorBD.getEjercicios(rutina);
                 this.hashRutinas.put(rutina, ejercicios.size());

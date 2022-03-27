@@ -37,16 +37,19 @@ public class addRoutine extends AppCompatActivity {
             public void onClick(View view) {
                 nombreRutinaText = (EditText) findViewById(R.id.addRoutine_nombreRutina);
                 nombreRutina = nombreRutinaText.getText().toString();
-                agregado = gestorBD.agregarRutina(nombreRutina);
-                if (agregado) {
-                    Intent i = new Intent();
-                    i.putExtra("rutina", nombreRutina.toString());
-                    setResult(Activity.RESULT_OK, i);
-                    finish();
+                if (nombreRutina.equals("")) {
+                    Toast.makeText(addRoutine.this, "Por favor, ingrese un nombre para la rutina", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(addRoutine.this, "Ya existe una rutina con el nombre " + nombreRutina + ". Por favor pruebe con otro nombre.", Toast.LENGTH_SHORT).show();
+                    agregado = gestorBD.agregarRutina(nombreRutina);
+                    if (agregado) {
+                        Intent i = new Intent();
+                        i.putExtra("rutina", nombreRutina.toString());
+                        setResult(Activity.RESULT_OK, i);
+                        finish();
+                    } else {
+                        Toast.makeText(addRoutine.this, "Ya existe una rutina con el nombre " + nombreRutina + ". Por favor pruebe con otro nombre.", Toast.LENGTH_SHORT).show();
+                    }
                 }
-
             }
         });
 
