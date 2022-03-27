@@ -54,6 +54,7 @@ public class miBD extends SQLiteOpenHelper {
         c.close();
         return rutinas;
     }
+
     public boolean agregarRutina(String nombre) {
         boolean agregado = false;
         ArrayList<String> rutinas = this.getRutinas();
@@ -80,8 +81,27 @@ public class miBD extends SQLiteOpenHelper {
         }
         c.close();
         db.close();
-        Log.i("ejercicios","size: "+ejercicios.size());
+        Log.i("ejercicios", "size: " + ejercicios.size());
         return ejercicios;
+    }
+
+    public ArrayList<Integer> getInfoEjercicio(String ejercicio, String rutina) {
+        ArrayList<Integer> info = new ArrayList<Integer>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM Ejercicios WHERE nombre= ? AND rutina= ?";
+        Cursor c = db.rawQuery(query, new String[]{ejercicio, rutina});
+        while (c.moveToNext()) {
+            int indexSeries = c.getColumnIndex("numSeries");
+            int indexRepes = c.getColumnIndex("numRepes");
+            int indexPeso = c.getColumnIndex("peso");
+            info.add(c.getInt(indexSeries));
+            info.add(c.getInt(indexRepes));
+            info.add(c.getInt(indexPeso));
+        }
+        c.close();
+        db.close();
+
+        return info;
     }
 
     public void agregarEjercicio(String nombreEjer, int series, int repeticiones, int peso, String nombreRutina) {
@@ -99,4 +119,14 @@ public class miBD extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void editarEjercicio(String nombreEjer, int series, int repeticiones, int peso, String nombreRutina) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("nombre", nombreEjer);
+        values.put("numSeries", series);
+        values.put("numRepes", repeticiones);
+        values.put("peso", peso);
+        db.update("Ejercicios",values,"rutina=?",new String[]{nombreRutina});
+        db.close();
+    }
 }

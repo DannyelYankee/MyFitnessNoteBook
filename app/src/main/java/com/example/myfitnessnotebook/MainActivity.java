@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     FloatingActionButton fab;
     FloatingActionButton fab1;
     FloatingActionButton fab2;
-    FloatingActionButton fab3;
+    //FloatingActionButton fab3;
     boolean isFABOpen;
     Button btnLogin;
     ListView listView;
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab1 = (FloatingActionButton) findViewById(R.id.fab1);
         fab2 = (FloatingActionButton) findViewById(R.id.fab2);
-        fab3 = (FloatingActionButton) findViewById(R.id.fab3);
+        //fab3 = (FloatingActionButton) findViewById(R.id.fab3);
 
         fab1.setOnClickListener(new View.OnClickListener() {
             /*Botón para añadir un entrenamiento*/
@@ -176,14 +176,14 @@ public class MainActivity extends AppCompatActivity {
         isFABOpen = true;
         fab1.animate().translationY(-getResources().getDimension(R.dimen.standard_75));
         fab2.animate().translationY(-getResources().getDimension(R.dimen.standard_125));
-        fab3.animate().translationY(-getResources().getDimension(R.dimen.standard_175));
+        //fab3.animate().translationY(-getResources().getDimension(R.dimen.standard_175));
     }
 
     private void closeFABMenu() {
         isFABOpen = false;
         fab1.animate().translationY(0);
         fab2.animate().translationY(0);
-        fab3.animate().translationY(0);
+        //fab3.animate().translationY(0);
     }
 
 }
