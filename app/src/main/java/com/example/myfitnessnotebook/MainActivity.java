@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     ArrayList<String> rutinas;
     HashMap<String, Integer> hashRutinas;
-    ArrayAdapter arrayAdapter;
+    //ArrayAdapter arrayAdapter;
     miBD gestorBD;
 
 
@@ -70,8 +70,8 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         MainActivity.this.deleteDatabase("MyFitnessNotebook");
                         rutinas = new ArrayList<>();
-                        arrayAdapter.clear();
-                        arrayAdapter.notifyDataSetChanged();
+                        AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(),new String[]{},new int[]{});
+                        listView.setAdapter(arrayAdapter);
 
                         NotificationManager elManager = (NotificationManager) getSystemService(MainActivity.this.NOTIFICATION_SERVICE);
                         NotificationCompat.Builder elBuilder = new NotificationCompat.Builder(MainActivity.this, "IdCanal");
@@ -119,7 +119,10 @@ public class MainActivity extends AppCompatActivity {
         hashRutinas = new HashMap<>();
         rutinas = gestorBD.getRutinas();
         this.inicializarHashMap();
-        arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
+        //arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
+        int[] imagenes = {R.drawable.zyzz};
+        String[] rutinasArray = this.convertirArray(rutinas);
+        AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(),rutinasArray,imagenes);
         listView.setAdapter(arrayAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -156,7 +159,10 @@ public class MainActivity extends AppCompatActivity {
                         gestorBD.eliminarRutina(rutinas.get(position));
                         hashRutinas.remove(rutinas.get(position));
                         rutinas.remove(position);
-                        arrayAdapter.notifyDataSetChanged();
+                        int[] imagenes = {R.drawable.zyzz};
+                        String[] rutinasArray = convertirArray(rutinas);
+                        AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(),rutinasArray,imagenes);
+                        listView.setAdapter(arrayAdapter);
                     }
                 }).setNegativeButton("No",null).show();
 
@@ -175,7 +181,11 @@ public class MainActivity extends AppCompatActivity {
                 rutinas = gestorBD.getRutinas();
                 ArrayList<String> ejercicios = gestorBD.getEjercicios(rutina);
                 this.hashRutinas.put(rutina, ejercicios.size());
-                arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
+                //arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
+                //listView.setAdapter(arrayAdapter);
+                int[] imagenes = {R.drawable.zyzz};
+                String[] rutinasArray = this.convertirArray(rutinas);
+                AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(),rutinasArray,imagenes);
                 listView.setAdapter(arrayAdapter);
             }
         }
@@ -187,7 +197,11 @@ public class MainActivity extends AppCompatActivity {
                 this.hashRutinas.put(rutina, ejercicios.size());
                 System.out.println(hashRutinas);
                 rutinas = gestorBD.getRutinas();
-                arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
+                //arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
+                //listView.setAdapter(arrayAdapter);
+                int[] imagenes = {R.drawable.zyzz};
+                String[] rutinasArray = this.convertirArray(rutinas);
+                AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(),rutinasArray,imagenes);
                 listView.setAdapter(arrayAdapter);
             }
         }
@@ -197,13 +211,25 @@ public class MainActivity extends AppCompatActivity {
                 ArrayList<String> ejercicios = gestorBD.getEjercicios(rutina);
                 this.hashRutinas.put(rutina, ejercicios.size());
                 rutinas = gestorBD.getRutinas();
-                arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
+                //arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
+                //listView.setAdapter(arrayAdapter);
+                int[] imagenes = {R.drawable.zyzz};
+                String[] rutinasArray = this.convertirArray(rutinas);
+                AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(),rutinasArray,imagenes);
                 listView.setAdapter(arrayAdapter);
 
             }
         }
     }
-
+    public String[] convertirArray(ArrayList<String> lista){
+        String[] array = new String[lista.size()];
+        int j= 0;
+        for(String i : lista){
+            array[j] = i;
+            j++;
+        }
+        return array;
+    }
     private void inicializarHashMap() {
 
         ArrayList<String> rutinas = gestorBD.getRutinas();
