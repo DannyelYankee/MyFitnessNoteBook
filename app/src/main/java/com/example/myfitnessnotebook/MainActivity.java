@@ -1,12 +1,17 @@
 package com.example.myfitnessnotebook;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
 import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -64,10 +69,23 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         MainActivity.this.deleteDatabase("MyFitnessNotebook");
-                        Toast.makeText(MainActivity.this, "BBDD borrada con exito", Toast.LENGTH_SHORT).show();
                         rutinas = new ArrayList<>();
                         arrayAdapter.clear();
                         arrayAdapter.notifyDataSetChanged();
+
+                        NotificationManager elManager = (NotificationManager) getSystemService(MainActivity.this.NOTIFICATION_SERVICE);
+                        NotificationCompat.Builder elBuilder = new NotificationCompat.Builder(MainActivity.this, "IdCanal");
+
+                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                            NotificationChannel elCanal = new NotificationChannel("CanalBBDD", "Notificacion Eliminar",NotificationManager.IMPORTANCE_DEFAULT);
+                            elManager.createNotificationChannel(elCanal);
+                        }
+                        elBuilder.setSmallIcon(R.drawable.ic_baseline_warning_24);
+                        elBuilder.setContentTitle("Base de Datos vaciada");
+                        elBuilder.setContentText("Se ha vaciado la Base de Datos");
+                        elBuilder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                        elBuilder.setAutoCancel(true);
+                        elManager.notify(1,elBuilder.build());
                     }
                 }).setNegativeButton("No",null).show();
 
