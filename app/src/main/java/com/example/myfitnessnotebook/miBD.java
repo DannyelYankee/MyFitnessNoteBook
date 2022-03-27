@@ -119,14 +119,33 @@ public class miBD extends SQLiteOpenHelper {
         db.close();
     }
 
-    public void editarEjercicio(String nombreEjer, int series, int repeticiones, int peso, String nombreRutina) {
+    public int getID(String ejercicio, String rutina) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM Ejercicios WHERE nombre = ? AND rutina = ?";
+        Cursor c = db.rawQuery(query, new String[]{ejercicio, rutina});
+        int id = -1;
+        while (c.moveToNext()) {
+            int index = c.getColumnIndex("id");
+            id = c.getInt(index);
+        }
+        return id;
+    }
+
+    public void editarEjercicio(String nombreOriginal, String nombreEjer, int series, int repeticiones, int peso, String nombreRutina) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("nombre", nombreEjer);
+        int idEjercicio = this.getID(nombreOriginal, nombreRutina);
         values.put("numSeries", series);
         values.put("numRepes", repeticiones);
         values.put("peso", peso);
-        db.update("Ejercicios",values,"rutina=?",new String[]{nombreRutina});
+        db.update("Ejercicios", values, "id=?", new String[]{String.valueOf(idEjercicio)});
+        if (nombreEjer != nombreOriginal) {
+            ContentValues values2 = new ContentValues();
+            values2.put("nombre", nombreEjer);
+            System.out.println("id de "+nombreOriginal+"--->"+idEjercicio);
+            db.update("Ejercicios", values2, "id=?", new String[]{String.valueOf(idEjercicio)});
+        }
         db.close();
+        System.out.println("Update hecho");
     }
 }

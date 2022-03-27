@@ -81,7 +81,7 @@ public class VerEditarRutina extends AppCompatActivity {
                 iVerEditar.putExtra("numRepes", infoEjer.get(1).toString());
                 iVerEditar.putExtra("peso", infoEjer.get(2).toString());
                 iVerEditar.putExtra("rutina", rutina);
-                startActivityForResult(iVerEditar, 5);
+                startActivityForResult(iVerEditar, 10);
             }
         });
 
@@ -92,22 +92,54 @@ public class VerEditarRutina extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 3) {
             if (resultCode == RESULT_OK) {
-                String rutina = data.getStringExtra("rutina");
-                ArrayList<String> ejercicios = gestorBD.getEjercicios(rutina);
-                arrayAdapter = new ArrayAdapter(VerEditarRutina.this, android.R.layout.simple_list_item_1, ejercicios);
+                rutina = getIntent().getStringExtra("nombreRutina");
+                listaEjercicios = gestorBD.getEjercicios(rutina);
+                arrayAdapter = new ArrayAdapter(VerEditarRutina.this, android.R.layout.simple_list_item_2, android.R.id.text1, listaEjercicios) {
+                    @Override
+                    public View getView(int position, View convertView, ViewGroup parent) {
+                        View vista = super.getView(position, convertView, parent);
+                        TextView lineaPrincipal = (TextView) vista.findViewById(android.R.id.text1);
+                        TextView lineaSecundaria = (TextView) vista.findViewById(android.R.id.text2);
+                        String nombreEjercicio = listaEjercicios.get(position);
+                        lineaPrincipal.setText(nombreEjercicio);
+                        ArrayList<Integer> infoEjercicio = gestorBD.getInfoEjercicio(nombreEjercicio, rutina);
+                        String info = infoEjercicio.get(0) + "x" + infoEjercicio.get(1) + " con " + infoEjercicio.get(2) + "Kg";
+                        lineaSecundaria.setText(info);
+                        return vista;
+                    }
+                };
                 listView.setAdapter(arrayAdapter);
                 Intent iBack = new Intent();
                 iBack.putExtra("rutina", rutina);
                 setResult(Activity.RESULT_OK, iBack);
-                finish();
+
             }
         }
-        if (requestCode == 5) {
+        if (requestCode == 10) {
             if (resultCode == RESULT_OK) {
+
+                rutina = getIntent().getStringExtra("nombreRutina");
+                listaEjercicios = gestorBD.getEjercicios(rutina);
+                arrayAdapter = new ArrayAdapter(VerEditarRutina.this, android.R.layout.simple_list_item_2, android.R.id.text1, listaEjercicios) {
+                    @Override
+                    public View getView(int position, View convertView, ViewGroup parent) {
+                        View vista = super.getView(position, convertView, parent);
+                        TextView lineaPrincipal = (TextView) vista.findViewById(android.R.id.text1);
+                        TextView lineaSecundaria = (TextView) vista.findViewById(android.R.id.text2);
+                        String nombreEjercicio = listaEjercicios.get(position);
+                        lineaPrincipal.setText(nombreEjercicio);
+                        ArrayList<Integer> infoEjercicio = gestorBD.getInfoEjercicio(nombreEjercicio, rutina);
+                        String info = infoEjercicio.get(0) + "x" + infoEjercicio.get(1) + " con " + infoEjercicio.get(2) + "Kg";
+                        lineaSecundaria.setText(info);
+                        return vista;
+                    }
+                };
+                listView.setAdapter(arrayAdapter);
+
                 Intent iBack = new Intent();
                 iBack.putExtra("rutina", rutina);
                 setResult(Activity.RESULT_OK, iBack);
-                finish();
+
             }
         }
     }

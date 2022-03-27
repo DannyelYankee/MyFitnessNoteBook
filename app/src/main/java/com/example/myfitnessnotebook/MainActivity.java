@@ -49,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "Añadir nuevo entrenamiento", Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(MainActivity.this, addRoutine.class);
                 startActivityForResult(i, 1);
                 closeFABMenu();

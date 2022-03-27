@@ -33,24 +33,40 @@ public class EditarEjercicio extends AppCompatActivity {
         String rutinaExtra = getIntent().getStringExtra("rutina");
 
         editNombre.setHint(nombreExtra);
-        editSeries.setHint(Integer.parseInt(seriesExtra));
-        editRepes.setHint(Integer.parseInt(repesExtra));
-        editPeso.setHint(Integer.parseInt(pesoExtra));
+        editSeries.setHint(seriesExtra + " series");
+        editRepes.setHint(repesExtra + " repeticiones");
+        editPeso.setHint(pesoExtra + " kg");
 
-        String nombreEditado = editNombre.getText().toString();
-        String seriesEditado = editSeries.getText().toString();
-        String repesEditado = editRepes.getText().toString();
-        String pesoEditado = editPeso.getText().toString();
 
         btnEdit = (Button) findViewById(R.id.btn_EditEjer);
         btnEdit.setOnClickListener(new View.OnClickListener() {
             /*Botón para actualizar la BBDD con los nuevos datos del ejercicio*/
             @Override
             public void onClick(View view) {
+                String nombreEditado = editNombre.getText().toString();
+                String seriesEditado = editSeries.getText().toString();
+                String repesEditado = editRepes.getText().toString();
+                String pesoEditado = editPeso.getText().toString();
+                /* Comprobamos que los campos no sean vacíos
+                 * En caso de serlo, cogerán el valor actual pues
+                 * se entiende que el usuario no quiso cambiar esos valores*/
+                if (nombreEditado.equals("")) {
+                    nombreEditado = nombreExtra;
+                }
+                if (seriesEditado.equals("")) {
+                    seriesEditado = seriesExtra;
+                }
+                if (repesEditado.equals("")) {
+                    repesEditado = repesExtra;
+                }
+                if (pesoEditado.equals("")) {
+                    pesoEditado = pesoExtra;
+                }
+
                 int series = Integer.parseInt(seriesEditado);
                 int repes = Integer.parseInt(repesEditado);
                 int peso = Integer.parseInt(pesoEditado);
-                gestorBD.editarEjercicio(nombreEditado, series, repes, peso, rutinaExtra);
+                gestorBD.editarEjercicio(nombreExtra,nombreEditado, series, repes, peso, rutinaExtra);
                 Intent iBack = new Intent();
                 setResult(RESULT_OK);
                 finish();
