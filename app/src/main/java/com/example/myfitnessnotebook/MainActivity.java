@@ -104,7 +104,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        /*Boton login*/
+        /*Boton login
+        * PROXIMAMENTE.... DE MOMENTO NO ESTA OPERATIVO*/
         btnLogin = (Button) findViewById(R.id.btn_login);
         Intent iLogin = new Intent(this, Login.class);
         btnLogin.setOnClickListener(new View.OnClickListener() {
