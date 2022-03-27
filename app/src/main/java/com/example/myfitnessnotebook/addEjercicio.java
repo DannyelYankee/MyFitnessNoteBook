@@ -53,13 +53,13 @@ public class addEjercicio extends AppCompatActivity {
                 if (nombreEjer.getText().toString().equals("") || series.getText().toString().equals("") || repeticiones.getText().toString().equals("") || peso.getText().toString().equals("")) {
                     Toast.makeText(addEjercicio.this, "Por favor, llene todos los campos", Toast.LENGTH_SHORT).show();
                 } else {
+
                     int numSeries = Integer.parseInt(series.getText().toString());
                     String nombreEjercicio = nombreEjer.getText().toString();
                     int repes = Integer.parseInt(repeticiones.getText().toString());
                     int pesoKG = Integer.parseInt(peso.getText().toString());
                     String rutina = getIntent().getStringExtra("nombreRutina");
-
-
+                    /*Se agrega el ejercicio a la BBDD*/
                     gestorBD.agregarEjercicio(nombreEjercicio, numSeries, repes, pesoKG, rutina);
                     Intent iBack = new Intent();
                     iBack.putExtra("rutina", nombreRutinaExtra);

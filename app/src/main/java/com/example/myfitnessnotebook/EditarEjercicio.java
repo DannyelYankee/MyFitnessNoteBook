@@ -32,6 +32,7 @@ public class EditarEjercicio extends AppCompatActivity {
         String pesoExtra = getIntent().getStringExtra("peso");
         String rutinaExtra = getIntent().getStringExtra("rutina");
 
+        /*Establecemos los hint de los EditText con los datos actuales para que el usuario sepa cual le interesa cambiar*/
         editNombre.setHint(nombreExtra);
         editSeries.setHint(seriesExtra + " series");
         editRepes.setHint(repesExtra + " repeticiones");

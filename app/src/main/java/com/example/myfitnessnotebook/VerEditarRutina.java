@@ -127,7 +127,7 @@ public class VerEditarRutina extends AppCompatActivity {
                 startActivityForResult(iVerEditar, 10);
             }
         });
-        /*Al clickar un rato en un tiem de la lista se podrá eliminar*/
+        /*Al clickar un rato en un tiem de la lista se podrá eliminar y saltará una alerta señalándonos lo que va a ocurrir*/
 
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -151,7 +151,7 @@ public class VerEditarRutina extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 3) {
-            if (resultCode == RESULT_OK) {
+            if (resultCode == RESULT_OK) {//Se ha añadido un nuevo ejercicio correctamente
                 rutina = getIntent().getStringExtra("nombreRutina");
                 listaEjercicios = gestorBD.getEjercicios(rutina);
                 arrayAdapter = new ArrayAdapter(VerEditarRutina.this, android.R.layout.simple_list_item_2, android.R.id.text1, listaEjercicios) {
@@ -176,8 +176,7 @@ public class VerEditarRutina extends AppCompatActivity {
             }
         }
         if (requestCode == 10) {
-            if (resultCode == RESULT_OK) {
-
+            if (resultCode == RESULT_OK) { //Se ha editado un ejercicio correctamente
                 rutina = getIntent().getStringExtra("nombreRutina");
                 listaEjercicios = gestorBD.getEjercicios(rutina);
                 arrayAdapter = new ArrayAdapter(VerEditarRutina.this, android.R.layout.simple_list_item_2, android.R.id.text1, listaEjercicios) {

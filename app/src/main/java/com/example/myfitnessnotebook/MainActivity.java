@@ -73,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
                         AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(),new String[]{},new int[]{});
                         listView.setAdapter(arrayAdapter);
 
+                        /*Preparamos notificación que saldrá con un icono de Warning para avisar de que la BBDD ha sido vaciada por completo*/
+
                         NotificationManager elManager = (NotificationManager) getSystemService(MainActivity.this.NOTIFICATION_SERVICE);
                         NotificationCompat.Builder elBuilder = new NotificationCompat.Builder(MainActivity.this, "IdCanal");
 
@@ -88,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
                         elManager.notify(1,elBuilder.build());
                     }
                 }).setNegativeButton("No",null).show();
-
                 closeFABMenu();
             }
         });
@@ -149,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
+        /*Al clickar durante x segundos una rutina saltará una alerta para eliminar la rutina si así lo desea el usuario*/
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -178,6 +179,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
+                //La rutina se agregó correctamente
                 String rutina = data.getStringExtra("rutina");
                 rutinas = gestorBD.getRutinas();
                 ArrayList<String> ejercicios = gestorBD.getEjercicios(rutina);
@@ -206,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
                 listView.setAdapter(arrayAdapter);
             }
         }
-        if (requestCode == 4) {
+        if (requestCode == 4) { //Se ha añadido algun ejercicio más desde la clase VerEditarRutina
             if (resultCode == RESULT_OK) {
                 String rutina = data.getStringExtra("rutina");
                 ArrayList<String> ejercicios = gestorBD.getEjercicios(rutina);

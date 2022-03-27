@@ -18,6 +18,8 @@ public class Login extends AppCompatActivity {
     miBD gestorBD;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        /*PROXIMAMENTE.......*/
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 

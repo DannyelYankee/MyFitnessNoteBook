@@ -42,6 +42,7 @@ public class miBD extends SQLiteOpenHelper {
     }
 
     public ArrayList<String> getRutinas() {
+        /*Devuelve los nombres de las rutinas*/
         ArrayList<String> rutinas = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM Rutinas";
@@ -56,6 +57,7 @@ public class miBD extends SQLiteOpenHelper {
     }
 
     public boolean agregarRutina(String nombre) {
+        //Agrega nueva rutina a la BBDD
         boolean agregado = false;
         ArrayList<String> rutinas = this.getRutinas();
         if (!rutinas.contains(nombre)) {
@@ -70,6 +72,7 @@ public class miBD extends SQLiteOpenHelper {
     }
 
     public ArrayList<String> getEjercicios(String rutina) {
+        /*Devuelve una lista con los nombres de todos los ejercicios dada una rutina*/
         ArrayList<String> ejercicios = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM Ejercicios WHERE rutina= ?";
@@ -86,6 +89,8 @@ public class miBD extends SQLiteOpenHelper {
     }
 
     public ArrayList<Integer> getInfoEjercicio(String ejercicio, String rutina) {
+        /*Dado el nombre de un ejercicio y el nombre de la rutina a la que pertenece:
+        * devuelve una lista con los datos de dicho ejercicio: nº series, nº repeticiones y peso*/
         ArrayList<Integer> info = new ArrayList<Integer>();
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM Ejercicios WHERE nombre= ? AND rutina= ?";
@@ -105,8 +110,8 @@ public class miBD extends SQLiteOpenHelper {
     }
 
     public void agregarEjercicio(String nombreEjer, int series, int repeticiones, int peso, String nombreRutina) {
+        //Agrega un ejercicio nuevo a la BBDD
         SQLiteDatabase db = this.getWritableDatabase();
-
         ContentValues values = new ContentValues();
         values.put("nombre", nombreEjer);
         values.put("numSeries", series);
@@ -119,6 +124,7 @@ public class miBD extends SQLiteOpenHelper {
         db.close();
     }
     public void eliminarEjercicio(String nombreEjer, String rutina){
+        //Elimina un ejercicio en específico perteneciente a una rutina en concreto
         int id = this.getID(nombreEjer,rutina);
         SQLiteDatabase db = this.getWritableDatabase();
         System.out.println("id de "+nombreEjer+"--->"+id);
@@ -126,6 +132,7 @@ public class miBD extends SQLiteOpenHelper {
         db.close();
     }
     public void eliminarRutina(String rutina){
+        //Elimina una rutina de la BBDD
         SQLiteDatabase db = this .getWritableDatabase();
         /*Primero eliminamos todos los ejercicios relacionados con la rutina*/
         db.delete("Ejercicios","rutina=?",new String[]{rutina});
@@ -133,6 +140,7 @@ public class miBD extends SQLiteOpenHelper {
         db.close();
     }
     public int getID(String ejercicio, String rutina) {
+        //Dado el nombre de un ejercicio y el de la rutina a la que pertence, devuelve el id de dicha row de la BBDD
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM Ejercicios WHERE nombre = ? AND rutina = ?";
         Cursor c = db.rawQuery(query, new String[]{ejercicio, rutina});
@@ -144,6 +152,7 @@ public class miBD extends SQLiteOpenHelper {
         return id;
     }
     public void editarEjercicio(String nombreOriginal, String nombreEjer, int series, int repeticiones, int peso, String nombreRutina) {
+        //Actualiza en la BBDD los datos de un ejercicio
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         int idEjercicio = this.getID(nombreOriginal, nombreRutina);
@@ -151,7 +160,7 @@ public class miBD extends SQLiteOpenHelper {
         values.put("numRepes", repeticiones);
         values.put("peso", peso);
         db.update("Ejercicios", values, "id=?", new String[]{String.valueOf(idEjercicio)});
-        if (nombreEjer != nombreOriginal) {
+        if (nombreEjer != nombreOriginal) {//Si el usuario decide cambiar el nombre del ejercicio
             ContentValues values2 = new ContentValues();
             values2.put("nombre", nombreEjer);
             db.update("Ejercicios", values2, "id=?", new String[]{String.valueOf(idEjercicio)});
