@@ -108,9 +108,9 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(MainActivity.this, "Se abrira ver/editar rutina", Toast.LENGTH_SHORT).show();
                     Intent iVerEditar = new Intent(MainActivity.this, VerEditarRutina.class);
+                    System.out.println(nombreRutina);
                     iVerEditar.putExtra("nombreRutina", nombreRutina);
                     startActivity(iVerEditar);
-                    finish();
                 }
             }
         });
@@ -124,7 +124,8 @@ public class MainActivity extends AppCompatActivity {
                 String rutina = data.getStringExtra("rutina");
                 System.out.println(rutina);
                 rutinas = gestorBD.getRutinas();
-                this.inicializarHashMap();
+                ArrayList<String> ejercicios = gestorBD.getEjercicios(rutina);
+                this.hashRutinas.put(rutina, ejercicios.size());
                 arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
                 listView.setAdapter(arrayAdapter);
             }
@@ -133,7 +134,9 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 System.out.println("se ha añadido el primer ejer a la rutina");
                 String rutina = data.getStringExtra("rutina");
-                hashRutinas.put(rutina, hashRutinas.get(rutina) + 1);
+                ArrayList<String> ejercicios = gestorBD.getEjercicios(rutina);
+                this.hashRutinas.put(rutina, ejercicios.size());
+                System.out.println(hashRutinas);
                 rutinas = gestorBD.getRutinas();
                 arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
                 listView.setAdapter(arrayAdapter);
@@ -142,9 +145,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void inicializarHashMap() {
-        for (String i : this.rutinas) {
-            this.hashRutinas.put(i, 0);
+
+        ArrayList<String> rutinas = gestorBD.getRutinas();
+        System.out.println(rutinas);
+        for (String rutina : rutinas) {
+            ArrayList<String> ejercicios = gestorBD.getEjercicios(rutina);
+            this.hashRutinas.put(rutina, ejercicios.size());
         }
+        System.out.println(hashRutinas);
     }
 
     private void showFABMenu() {

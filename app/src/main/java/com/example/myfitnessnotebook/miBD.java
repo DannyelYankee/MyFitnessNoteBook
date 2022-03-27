@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class miBD extends SQLiteOpenHelper {
     //public static final int DATABASE_VERSION = 1;
     //public static final String DATABASE_NAME = "MyFitnessBook.db";
-    int id = 0;
+
     public miBD(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
@@ -31,7 +31,7 @@ public class miBD extends SQLiteOpenHelper {
 
         /*Tabla Ejercicio:
          * nombre    numSeries   numRepes    peso   */
-        sqLiteDatabase.execSQL("CREATE TABLE Ejercicios ('id' INTEGER PRIMARY KEY NOT NULL, 'nombre' VARCHAR(255) NOT NULL, 'numSeries' INTEGER, 'numRepes' INTEGER, 'peso' INTEGER, 'rutina' VARCHAR(255))");
+        sqLiteDatabase.execSQL("CREATE TABLE Ejercicios ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 'nombre' VARCHAR(255) NOT NULL, 'numSeries' INTEGER, 'numRepes' INTEGER, 'peso' INTEGER, 'rutina' VARCHAR(255))");
 
 
     }
@@ -54,7 +54,6 @@ public class miBD extends SQLiteOpenHelper {
         c.close();
         return rutinas;
     }
-
     public boolean agregarRutina(String nombre) {
         boolean agregado = false;
         ArrayList<String> rutinas = this.getRutinas();
@@ -72,34 +71,28 @@ public class miBD extends SQLiteOpenHelper {
     public ArrayList<String> getEjercicios(String rutina) {
         ArrayList<String> ejercicios = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM Ejercicios WHERE rutina =" + rutina;
-        Cursor c = db.rawQuery(query, null);
+        String query = "SELECT * FROM Ejercicios WHERE rutina= ?";
+        Cursor c = db.rawQuery(query, new String[]{rutina});
         while (c.moveToNext()) {
             int i = c.getColumnIndex("nombre");
             String nombre = c.getString(i);
             ejercicios.add(nombre);
         }
         c.close();
+        db.close();
+        Log.i("ejercicios","size: "+ejercicios.size());
         return ejercicios;
     }
 
     public void agregarEjercicio(String nombreEjer, int series, int repeticiones, int peso, String nombreRutina) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        /*
-        Log.i("agregarEjercicio",nombreEjer+", "+series+", "+repeticiones+", "+peso+", "+nombreRutina);
-        String query = "INSERT INTO Ejercicios ('nombre', 'numSeries', 'numRepes', 'peso', 'rutina') VALUES('"+nombreEjer+"',"+series+","+repeticiones+","+peso+",'"+nombreRutina+"');");
-        db.execSQL(query);
-        */
-
         ContentValues values = new ContentValues();
-        values.put("id", this.id);
-        this.id++;
-        values.put("nombre", "espalda");
-        values.put("numSeries", 2);
-        values.put("numRepes", 3);
-        values.put("peso", 70);
-        values.put("rutina", "torso");
+        values.put("nombre", nombreEjer);
+        values.put("numSeries", series);
+        values.put("numRepes", repeticiones);
+        values.put("peso", peso);
+        values.put("rutina", nombreRutina);
         long newRowId = db.insert("Ejercicios", null, values);
 
         Log.i("agregarEjercicio", "agregado");

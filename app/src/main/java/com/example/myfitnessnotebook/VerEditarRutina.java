@@ -20,6 +20,7 @@ public class VerEditarRutina extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ver_editar_rutina);
+        gestorBD = new miBD(this, "MyFitnessNotebook", null, 1);
 
         listView = (ListView) findViewById(R.id.rutinaConEjer);
         rutina = getIntent().getStringExtra("nombreRutina");

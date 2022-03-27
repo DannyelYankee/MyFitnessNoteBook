@@ -28,25 +28,26 @@ public class addEjercicio extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_ejercicio);
+        gestorBD = new miBD(this, "MyFitnessNotebook", null, 1);
+
+
         nombreRutina = (TextView) findViewById(R.id.nombreRutina);
         numEjer = (TextView) findViewById(R.id.currentNumEjer);
-
         btn_addEjer = (Button) findViewById(R.id.btn_addEjer);
+        nombreEjer = (EditText) findViewById(R.id.nombreEjercicio);
+        series = (EditText) findViewById(R.id.series);
+        repeticiones = (EditText) findViewById(R.id.repeticiones);
+        peso = (EditText) findViewById(R.id.peso);
+
 
         String nombreRutinaExtra = getIntent().getStringExtra("nombreRutina");
         nombreRutina.setText(nombreRutinaExtra);
         String numEjerExtra = getIntent().getStringExtra("numEjer");
         numEjer.setText(numEjerExtra);
 
-
         btn_addEjer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                nombreEjer = (EditText) findViewById(R.id.nombreEjercicio);
-                series = (EditText) findViewById(R.id.series);
-                repeticiones = (EditText) findViewById(R.id.repeticiones);
-                peso = (EditText) findViewById(R.id.peso);
-
 
                 int numSeries = Integer.parseInt(series.getText().toString());
                 String nombreEjercicio = nombreEjer.getText().toString();
