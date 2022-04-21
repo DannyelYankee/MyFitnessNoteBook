@@ -18,6 +18,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     HashMap<String, Integer> hashRutinas;
     //ArrayAdapter arrayAdapter;
     miBD gestorBD;
+    TextView logueado;
 
 
     @Override
@@ -44,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         gestorBD = new miBD(this, "MyFitnessNotebook", null, 1);
+
+        logueado = (TextView) findViewById(R.id.logueadoTV);
 
         /*Menú flotante para agregar y eliminar rutinas a nuestro cuaderno*/
         fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -70,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         MainActivity.this.deleteDatabase("MyFitnessNotebook");
                         rutinas = new ArrayList<>();
-                        AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(),new String[]{},new int[]{});
+                        AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(), new String[]{}, new int[]{});
                         listView.setAdapter(arrayAdapter);
 
                         /*Preparamos notificación que saldrá con un icono de Warning para avisar de que la BBDD ha sido vaciada por completo*/
@@ -78,8 +82,8 @@ public class MainActivity extends AppCompatActivity {
                         NotificationManager elManager = (NotificationManager) getSystemService(MainActivity.this.NOTIFICATION_SERVICE);
                         NotificationCompat.Builder elBuilder = new NotificationCompat.Builder(MainActivity.this, "IdCanal");
 
-                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-                            NotificationChannel elCanal = new NotificationChannel("CanalBBDD", "Notificacion Eliminar",NotificationManager.IMPORTANCE_DEFAULT);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            NotificationChannel elCanal = new NotificationChannel("CanalBBDD", "Notificacion Eliminar", NotificationManager.IMPORTANCE_DEFAULT);
                             elManager.createNotificationChannel(elCanal);
                         }
                         elBuilder.setSmallIcon(R.drawable.ic_baseline_warning_24);
@@ -87,9 +91,9 @@ public class MainActivity extends AppCompatActivity {
                         elBuilder.setContentText("Se ha vaciado la Base de Datos");
                         elBuilder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
                         elBuilder.setAutoCancel(true);
-                        elManager.notify(1,elBuilder.build());
+                        elManager.notify(1, elBuilder.build());
                     }
-                }).setNegativeButton("No",null).show();
+                }).setNegativeButton("No", null).show();
                 closeFABMenu();
             }
         });
@@ -106,13 +110,21 @@ public class MainActivity extends AppCompatActivity {
         });
 
         /*Boton login
-        * PROXIMAMENTE.... DE MOMENTO NO ESTA OPERATIVO*/
+         * PROXIMAMENTE.... DE MOMENTO NO ESTA OPERATIVO*/
         btnLogin = (Button) findViewById(R.id.btn_login);
-        Intent iLogin = new Intent(this, Login.class);
+        System.out.println("BotonLogin --> " + btnLogin.getText().toString());
+
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivityForResult(iLogin, 2);
+                if (btnLogin.getText().toString().equals("Iniciar Sesión")) {
+                    Intent iLogin = new Intent(MainActivity.this, Login.class);
+                    startActivityForResult(iLogin, 20);
+                }else { //Se gestiona el comportamiento de cerrar sesión
+                    Toast.makeText(MainActivity.this, "Se cierra la sesion", Toast.LENGTH_SHORT).show();
+                    logueado.setText("");
+                    btnLogin.setText("Iniciar Sesión");
+                }
             }
         });
 
@@ -124,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
         //arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
         int[] imagenes = {R.drawable.zyzz};
         String[] rutinasArray = this.convertirArray(rutinas);
-        AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(),rutinasArray,imagenes);
+        AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(), rutinasArray, imagenes);
         listView.setAdapter(arrayAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -163,10 +175,10 @@ public class MainActivity extends AppCompatActivity {
                         rutinas.remove(position);
                         int[] imagenes = {R.drawable.zyzz};
                         String[] rutinasArray = convertirArray(rutinas);
-                        AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(),rutinasArray,imagenes);
+                        AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(), rutinasArray, imagenes);
                         listView.setAdapter(arrayAdapter);
                     }
-                }).setNegativeButton("No",null).show();
+                }).setNegativeButton("No", null).show();
 
                 return true;
 
@@ -188,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
                 //listView.setAdapter(arrayAdapter);
                 int[] imagenes = {R.drawable.zyzz};
                 String[] rutinasArray = this.convertirArray(rutinas);
-                AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(),rutinasArray,imagenes);
+                AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(), rutinasArray, imagenes);
                 listView.setAdapter(arrayAdapter);
             }
         }
@@ -204,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
                 //listView.setAdapter(arrayAdapter);
                 int[] imagenes = {R.drawable.zyzz};
                 String[] rutinasArray = this.convertirArray(rutinas);
-                AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(),rutinasArray,imagenes);
+                AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(), rutinasArray, imagenes);
                 listView.setAdapter(arrayAdapter);
             }
         }
@@ -218,21 +230,31 @@ public class MainActivity extends AppCompatActivity {
                 //listView.setAdapter(arrayAdapter);
                 int[] imagenes = {R.drawable.zyzz};
                 String[] rutinasArray = this.convertirArray(rutinas);
-                AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(),rutinasArray,imagenes);
+                AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(), rutinasArray, imagenes);
                 listView.setAdapter(arrayAdapter);
 
             }
         }
+        if (requestCode == 20) { //Se ha logueado por registro a un usuario
+            if (resultCode == RESULT_OK) {
+                String username = data.getStringExtra("user");
+                System.out.println("LOGUEADO --> " + username);
+                logueado.setText(username);
+                btnLogin.setText("Cerrar sesión");
+            }
+        }
     }
-    public String[] convertirArray(ArrayList<String> lista){
+
+    public String[] convertirArray(ArrayList<String> lista) {
         String[] array = new String[lista.size()];
-        int j= 0;
-        for(String i : lista){
+        int j = 0;
+        for (String i : lista) {
             array[j] = i;
             j++;
         }
         return array;
     }
+
     private void inicializarHashMap() {
 
         ArrayList<String> rutinas = gestorBD.getRutinas();

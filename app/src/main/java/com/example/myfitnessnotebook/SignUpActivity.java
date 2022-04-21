@@ -1,7 +1,15 @@
 package com.example.myfitnessnotebook;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -28,53 +36,53 @@ public class SignUpActivity extends AppCompatActivity {
         psswd1Text = (EditText) findViewById(R.id.passwordSU);
         psswd2Text = (EditText) findViewById(R.id.passwordSU2);
 
-        username = usernameText.getText().toString();
-        psswd1 = psswd1Text.getText().toString();
-        psswd2 = psswd2Text.getText().toString();
+
 
         /*Registramos el usuario en la BBDD*/
         btnSU = (Button) findViewById(R.id.btnLoginSU);
         btnSU.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (psswd1 == psswd2) {
-                    if(agregarUsuario(username, psswd1)){
-                        logueado = true;
-                        Intent i = new Intent();
-                        i.putExtra("logueado",logueado);
-                    }
+                username = usernameText.getText().toString();
+                psswd1 = psswd1Text.getText().toString();
+                psswd2 = psswd2Text.getText().toString();
 
+
+                System.out.println("Email: " + username + " psswd1: " + psswd1 + " psswd2: " + psswd2);
+                if (!psswd1.equals("") && !psswd2.equals("") && !username.equals("")) {
+                    if (psswd1.equals(psswd2)) {
+                        Data datos = new Data.Builder().putString("user", username).putString("password", psswd1).build();
+                        //Constraints restricciones = new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build();
+                        OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(phpRegistro.class).setInputData(datos).build();
+                        WorkManager.getInstance(SignUpActivity.this).getWorkInfoByIdLiveData(otwr.getId()).observe(SignUpActivity.this, new Observer<WorkInfo>() {
+                            @Override
+                            public void onChanged(WorkInfo workInfo) {
+                                if (workInfo != null && workInfo.getState().isFinished()) {
+                                    Boolean resultadoPhp = workInfo.getOutputData().getBoolean("exito", false);
+                                    System.out.println(resultadoPhp);
+                                    if (resultadoPhp) {
+                                        Intent i = new Intent();
+                                        i.putExtra("user", username);
+                                        setResult(Activity.RESULT_OK,i);
+                                        finish();
+
+                                    } else {
+                                        Toast.makeText(SignUpActivity.this, "El email ya está en uso, por favor pruebe con otro", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            }
+                        });
+                        WorkManager.getInstance(SignUpActivity.this).enqueue(otwr);
+                    } else {
+                        Toast.makeText(SignUpActivity.this, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
-                    Toast.makeText(SignUpActivity.this, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignUpActivity.this, "Por favor rellena todos los campos", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
     }
 
-    public SQLiteDatabase getBD() {
-        gestorBD = new miBD(this,"MyFitnessNotebook",null,1);
-        SQLiteDatabase bd = gestorBD.getWritableDatabase();
-        return bd;
-    }
-
-    public boolean agregarUsuario(String email, String psswd) {
-        SQLiteDatabase bd = this.getBD();
-        Boolean agreado = false;
-        /*Primero comprobamos que no exista un usuario con este correo*/
-        String selection = "correo LIKE ?";
-        String selectionArgs[] = new String[]{email};
-        Cursor c = bd.query("Users", null, selection, selectionArgs, null, null, null, null);
-        if (c.moveToFirst() && c.getCount() == 0) { // No hay usuarios con este correo
-            ContentValues values = new ContentValues();
-            values.put("email", email);
-            values.put("contra", psswd);
-            bd.insert("Users", null, values);
-            agreado = true;
-        }
-
-
-        return agreado;
-    }
 
 }

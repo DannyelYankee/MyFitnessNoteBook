@@ -5,12 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".SignUpActivity">
+
     <EditText
         android:id="@+id/usernameSU"
         android:layout_width="271dp"
         android:layout_height="48dp"
         android:layout_marginStart="87dp"
-        android:layout_marginTop="336dp"
+        android:layout_marginTop="232dp"
         android:layout_marginEnd="53dp"
         android:hint="Correo"
         app:layout_constraintEnd_toEndOf="parent"
@@ -24,7 +25,7 @@
         android:layout_height="48dp"
         android:layout_marginStart="87dp"
         android:layout_marginEnd="48dp"
-        android:layout_marginBottom="296dp"
+        android:layout_marginBottom="392dp"
         android:ems="10"
         android:hint="Contraseña"
         android:inputType="textPassword"
@@ -39,7 +40,7 @@
         android:layout_height="48dp"
         android:layout_marginStart="87dp"
         android:layout_marginEnd="48dp"
-        android:layout_marginBottom="236dp"
+        android:layout_marginBottom="340dp"
         android:ems="10"
         android:hint="Repite contraseña"
         android:inputType="textPassword"
@@ -54,12 +55,12 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="88dp"
         android:layout_marginEnd="229dp"
-        android:layout_marginBottom="160dp"
+        android:layout_marginBottom="284dp"
         android:backgroundTint="@android:color/darker_gray"
         android:text="Registrarse"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.023"
         app:layout_constraintStart_toStartOf="parent"
 
         />
