@@ -20,6 +20,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.regex.*;
+
 public class SignUpActivity extends AppCompatActivity {
     EditText usernameText, psswd1Text, psswd2Text;
     String username, psswd1, psswd2;
@@ -46,13 +48,11 @@ public class SignUpActivity extends AppCompatActivity {
                 username = usernameText.getText().toString();
                 psswd1 = psswd1Text.getText().toString();
                 psswd2 = psswd2Text.getText().toString();
-
-
                 System.out.println("Email: " + username + " psswd1: " + psswd1 + " psswd2: " + psswd2);
-                if (!psswd1.equals("") && !psswd2.equals("") && !username.equals("")) {
-                    if (psswd1.equals(psswd2)) {
+                if (validarEmail(username)) {
+                    if (validarContra(psswd1,psswd2)) {
+                        System.out.println("Contraseña valida--> "+validarContra(psswd1,psswd2));
                         Data datos = new Data.Builder().putString("user", username).putString("password", psswd1).build();
-                        //Constraints restricciones = new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build();
                         OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(phpRegistro.class).setInputData(datos).build();
                         WorkManager.getInstance(SignUpActivity.this).getWorkInfoByIdLiveData(otwr.getId()).observe(SignUpActivity.this, new Observer<WorkInfo>() {
                             @Override
@@ -63,9 +63,8 @@ public class SignUpActivity extends AppCompatActivity {
                                     if (resultadoPhp) {
                                         Intent i = new Intent();
                                         i.putExtra("user", username);
-                                        setResult(Activity.RESULT_OK,i);
+                                        setResult(Activity.RESULT_OK, i);
                                         finish();
-
                                     } else {
                                         Toast.makeText(SignUpActivity.this, "El email ya está en uso, por favor pruebe con otro", Toast.LENGTH_SHORT).show();
                                     }
@@ -74,15 +73,42 @@ public class SignUpActivity extends AppCompatActivity {
                         });
                         WorkManager.getInstance(SignUpActivity.this).enqueue(otwr);
                     } else {
-                        Toast.makeText(SignUpActivity.this, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SignUpActivity.this, "Contraseña incorrecta. Tu contraseña debe tener mínimo ocho caracteres, al menos una letra mayúscula, una letra minúscula, un número y un carácter especial.", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(SignUpActivity.this, "Por favor rellena todos los campos", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignUpActivity.this, "Correo electrónico inválido", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
     }
 
+    public boolean validarEmail(String email) {
+        boolean cumpleEmail = false;
+        //Vamos a comprobar que el email cumple con el siguiente patrón daniel@correo.com
+        if (email.trim().length() > 0) {
+            String regexPattern = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
+            if (Pattern.compile(regexPattern).matcher(email).matches()) {
+                cumpleEmail = true;
+            }
+        }
+        return cumpleEmail;
+    }
+
+    public boolean validarContra(String pass1, String pass2) {
+        boolean cumplePass = false;
+        //mínimo ocho caracteres, al menos una letra mayúscula, una letra minúscula, un número y un carácter especial. D@ja1920
+        String patron = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}$";
+        if (pass1.trim().length() > 0) {
+            if (pass1.equals(pass2)) {
+                if (Pattern.compile(patron).matcher(pass1).matches()) {
+                    cumplePass = true;
+                }
+            }
+        }
+        System.out.println(pass1+" --> "+Pattern.compile(patron).matcher(pass1).matches());
+        return cumplePass;
+
+    }
 
 }

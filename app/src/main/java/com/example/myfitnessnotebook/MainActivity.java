@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
-        if (requestCode == 20) { //Se ha logueado por registro a un usuario
+        if (requestCode == 20) { //Se ha logueado correctamente
             if (resultCode == RESULT_OK) {
                 String username = data.getStringExtra("user");
                 System.out.println("LOGUEADO --> " + username);
