@@ -2,20 +2,22 @@ package com.example.myfitnessnotebook;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
+import androidx.lifecycle.Observer;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -31,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     FloatingActionButton fab1;
     FloatingActionButton fab2;
     //FloatingActionButton fab3;
-    boolean isFABOpen;
+    boolean isFABOpen,log;
     Button btnLogin;
     ListView listView;
     ArrayList<String> rutinas;
@@ -40,14 +42,13 @@ public class MainActivity extends AppCompatActivity {
     miBD gestorBD;
     TextView logueado;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         gestorBD = new miBD(this, "MyFitnessNotebook", null, 1);
 
-        logueado = (TextView) findViewById(R.id.logueadoTV);
+        logueado = (TextView) findViewById(R.id.logueadoMain);
 
         /*Menú flotante para agregar y eliminar rutinas a nuestro cuaderno*/
         fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -60,6 +61,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(MainActivity.this, addRoutine.class);
+                if(log){
+                    i.putExtra("user",logueado.getText().toString());
+                }
                 startActivityForResult(i, 1);
                 closeFABMenu();
             }
@@ -109,8 +113,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        /*Boton login
-         * PROXIMAMENTE.... DE MOMENTO NO ESTA OPERATIVO*/
+        /*Boton login*/
         btnLogin = (Button) findViewById(R.id.btn_login);
         System.out.println("BotonLogin --> " + btnLogin.getText().toString());
 
@@ -128,62 +131,86 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        /*List view para mostrar las rutinas creadas dinámicamente*/
+        /*List view para mostrar las rutinas creadas dinámicamente SIN ESTAR LOGUEADO*/
         listView = findViewById(R.id.listViewRutinas);
-        hashRutinas = new HashMap<>();
-        rutinas = gestorBD.getRutinas();
-        this.inicializarHashMap();
-        //arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
-        int[] imagenes = {R.drawable.zyzz};
-        String[] rutinasArray = this.convertirArray(rutinas);
-        AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(), rutinasArray, imagenes);
-        listView.setAdapter(arrayAdapter);
+        if(!log) {
+            hashRutinas = new HashMap<>();
+            rutinas = gestorBD.getRutinas();
+            this.inicializarHashMap();
+            //arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
+            int[] imagenes = {R.drawable.zyzz};
+            String[] rutinasArray = this.convertirArray(rutinas);
+            AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(), rutinasArray, imagenes);
+            listView.setAdapter(arrayAdapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String nombreRutina = rutinas.get(i);
-                if (hashRutinas.get(nombreRutina) == 0) {
-                    /*Si la rutina se acaba de crear se lleva al usuario a una interfaz para que añada el primer ejercicio*/
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    String nombreRutina = rutinas.get(i);
+                    if (hashRutinas.get(nombreRutina) == 0) {
+                        /*Si la rutina se acaba de crear se lleva al usuario a una interfaz para que añada el primer ejercicio*/
 
-                    Intent iEjercicio = new Intent(MainActivity.this, addEjercicio.class);
-                    iEjercicio.putExtra("nombreRutina", nombreRutina);
-                    iEjercicio.putExtra("numEjer", hashRutinas.get(nombreRutina).toString());
-                    startActivityForResult(iEjercicio, 2);
-                } else {
-                    /*Si la rutina ya tiene algún ejercicio se lleva al usuario a una interfaz donde aparecen listados los ejericios
-                     * y podrá añadir más ejercicios, editarlos y/o borrarlos*/
+                        Intent iEjercicio = new Intent(MainActivity.this, addEjercicio.class);
+                        iEjercicio.putExtra("nombreRutina", nombreRutina);
+                        iEjercicio.putExtra("numEjer", hashRutinas.get(nombreRutina).toString());
+                        startActivityForResult(iEjercicio, 2);
+                    } else {
+                        /*Si la rutina ya tiene algún ejercicio se lleva al usuario a una interfaz donde aparecen listados los ejericios
+                         * y podrá añadir más ejercicios, editarlos y/o borrarlos*/
 
-                    Intent iVerEditar = new Intent(MainActivity.this, VerEditarRutina.class);
-                    System.out.println(nombreRutina);
-                    iVerEditar.putExtra("nombreRutina", nombreRutina);
-                    iVerEditar.putExtra("numEjer", hashRutinas.get(nombreRutina).toString());
-                    startActivityForResult(iVerEditar, 4);
-                }
-            }
-        });
-        /*Al clickar durante x segundos una rutina saltará una alerta para eliminar la rutina si así lo desea el usuario*/
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                int position = i;
-                new AlertDialog.Builder(MainActivity.this).setTitle("Eliminar rutina").setMessage("¿Deseas eliminar la rutina?").setPositiveButton("Sí", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        gestorBD.eliminarRutina(rutinas.get(position));
-                        hashRutinas.remove(rutinas.get(position));
-                        rutinas.remove(position);
-                        int[] imagenes = {R.drawable.zyzz};
-                        String[] rutinasArray = convertirArray(rutinas);
-                        AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(), rutinasArray, imagenes);
-                        listView.setAdapter(arrayAdapter);
+                        Intent iVerEditar = new Intent(MainActivity.this, VerEditarRutina.class);
+                        System.out.println(nombreRutina);
+                        iVerEditar.putExtra("nombreRutina", nombreRutina);
+                        iVerEditar.putExtra("numEjer", hashRutinas.get(nombreRutina).toString());
+                        startActivityForResult(iVerEditar, 4);
                     }
-                }).setNegativeButton("No", null).show();
+                }
+            });
+            /*Al clickar durante x segundos una rutina saltará una alerta para eliminar la rutina si así lo desea el usuario*/
+            listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    int position = i;
+                    new AlertDialog.Builder(MainActivity.this).setTitle("Eliminar rutina").setMessage("¿Deseas eliminar la rutina?").setPositiveButton("Sí", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            gestorBD.eliminarRutina(rutinas.get(position));
+                            hashRutinas.remove(rutinas.get(position));
+                            rutinas.remove(position);
+                            int[] imagenes = {R.drawable.zyzz};
+                            String[] rutinasArray = convertirArray(rutinas);
+                            AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(), rutinasArray, imagenes);
+                            listView.setAdapter(arrayAdapter);
+                        }
+                    }).setNegativeButton("No", null).show();
 
-                return true;
+                    return true;
 
-            }
-        });
+                }
+            });
+        }else{
+            Data datos = new Data.Builder().putString("user", logueado.getText().toString()).build();
+            OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(phpSelectRutinas.class).setInputData(datos).build();
+            WorkManager.getInstance(MainActivity.this).getWorkInfoByIdLiveData(otwr.getId()).observe(MainActivity.this, new Observer<WorkInfo>() {
+                @Override
+                public void onChanged(WorkInfo workInfo) {
+                    if (workInfo != null && workInfo.getState().isFinished()) {
+                        Boolean resultadoPhp = workInfo.getOutputData().getBoolean("exito", false);
+                        System.out.println(resultadoPhp);
+                        if (resultadoPhp) {
+                            String[] rutinasArray = workInfo.getOutputData().getStringArray("rutinas");
+                            int[] imagenes = {R.drawable.zyzz};
+                            AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(), rutinasArray, imagenes);
+                            listView.setAdapter(arrayAdapter);
+                        } else {
+                            Toast.makeText(MainActivity.this,"No tiene rutinas", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                }
+            });
+            WorkManager.getInstance(MainActivity.this).enqueue(otwr);
+        }
     }
 
     @Override
@@ -241,6 +268,31 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println("LOGUEADO --> " + username);
                 logueado.setText(username);
                 btnLogin.setText("Cerrar sesión");
+                log = true;
+
+                Data datos = new Data.Builder().putString("user", logueado.getText().toString()).build();
+                OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(phpSelectRutinas.class).setInputData(datos).build();
+                WorkManager.getInstance(MainActivity.this).getWorkInfoByIdLiveData(otwr.getId()).observe(MainActivity.this, new Observer<WorkInfo>() {
+                    @Override
+                    public void onChanged(WorkInfo workInfo) {
+                        if (workInfo != null && workInfo.getState().isFinished()) {
+                            Boolean resultadoPhp = workInfo.getOutputData().getBoolean("exito", false);
+                            System.out.println(resultadoPhp);
+                            if (resultadoPhp) {
+                                String[] rutinasArray = workInfo.getOutputData().getStringArray("rutinas");
+                                int[] imagenes = {R.drawable.zyzz};
+                                AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(), rutinasArray, imagenes);
+                                listView.setAdapter(arrayAdapter);
+                            } else {
+                                Toast.makeText(MainActivity.this,"No tiene rutinas", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                    }
+                });
+                WorkManager.getInstance(MainActivity.this).enqueue(otwr);
+
+
             }
         }
     }
