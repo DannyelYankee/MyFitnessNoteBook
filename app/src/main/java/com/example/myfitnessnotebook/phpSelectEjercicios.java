@@ -10,7 +10,7 @@ import androidx.work.WorkerParameters;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.*;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,8 +21,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class phpSelectRutinas extends Worker {
-    public phpSelectRutinas(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+public class phpSelectEjercicios extends Worker {
+    public phpSelectEjercicios(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
 
@@ -30,15 +30,17 @@ public class phpSelectRutinas extends Worker {
     @Override
     public Result doWork() {
         String user = getInputData().getString("user");
-        String server = "http://ec2-52-56-170-196.eu-west-2.compute.amazonaws.com/djuape001/WEB/selectRutinas.php";
+        String rutina = getInputData().getString("rutina");
+        String server = "http://ec2-52-56-170-196.eu-west-2.compute.amazonaws.com/djuape001/WEB/selectEjercicios.php";
         HttpURLConnection urlConnection = null;
         try {
             URL destino = new URL(server);
             urlConnection = (HttpURLConnection) destino.openConnection();
             urlConnection.setConnectTimeout(5000);
             urlConnection.setReadTimeout(5000);
-            Uri.Builder builder = new Uri.Builder().appendQueryParameter("user", user);
-            System.out.println("PARAMETROS phpSelectRutinas--> "+user);
+            Uri.Builder builder = new Uri.Builder().appendQueryParameter("user", user).appendQueryParameter("rutina",rutina);
+            System.out.println("PARAMETROS phpSelectEjercicios--> "+user);
+            System.out.println("PARAMETROS phpSelectEjercicios--> "+rutina);
             String parametros = builder.build().getEncodedQuery();
             urlConnection.setRequestMethod("POST");
             urlConnection.setDoOutput(true);
@@ -57,19 +59,25 @@ public class phpSelectRutinas extends Worker {
                 while ((line = bufferedReader.readLine()) != null) {
                     result += line;
                 }
+                String rdo = bufferedReader.readLine();
+                System.out.println("RDO----> "+result);
                 inputStream.close();
                 JSONArray jsonArray = new JSONArray(result);
-                ArrayList<String> rutinas = new ArrayList<>();
+                ArrayList<String> ejercicios = new ArrayList<>();
+
+                JSONArray js = new JSONArray();
                 for(int i  = 0; i < jsonArray.length(); i++){
-                    rutinas.add(jsonArray.getJSONObject(i).getString("resultado"));
+                    ejercicios.add(jsonArray.getJSONObject(i).getString("resultado"));
+                    //js = jsonArray.getJSONObject(i).getJSONArray("resultado");
                 }
-                System.out.println(rutinas);
+                System.out.println(ejercicios);
                 Data datos;
-                if (rutinas.size()==0) {
+                if (ejercicios.size()==0) {
                     datos = new Data.Builder().putBoolean("exito", false).build();
                 } else {
-                    String[] rutinasArray = rutinas.toArray(new String[rutinas.size()]);
-                    datos = new Data.Builder().putBoolean("exito", true).putStringArray("rutinas",rutinasArray).build();
+                    String[] ejerciciosArray = ejercicios.toArray(new String[ejercicios.size()]);
+
+                    datos = new Data.Builder().putBoolean("exito", true).putStringArray("ejercicios",ejerciciosArray).build();
                 }
                 return Result.success(datos);
             } else {
