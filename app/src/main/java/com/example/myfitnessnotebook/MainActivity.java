@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     ArrayList<String> rutinas;
     HashMap<String, Integer> hashRutinas;
+    ArrayList<Ejercicio> listaEjercicios;
     HashMap<String, ArrayList<Ejercicio>> hashEjercicios;
     //ArrayAdapter arrayAdapter;
     miBD gestorBD;
@@ -50,7 +51,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         gestorBD = new miBD(this, "MyFitnessNotebook", null, 1);
-
+        listaEjercicios = new ArrayList<>();
+        hashRutinas = new HashMap<>();
+        hashEjercicios = new HashMap<>();
         logueado = (TextView) findViewById(R.id.logueadoMain);
 
         /*Menú flotante para agregar y eliminar rutinas a nuestro cuaderno*/
@@ -198,8 +201,8 @@ public class MainActivity extends AppCompatActivity {
             */
 
         } else {
-            hashRutinas = new HashMap<>();
-            hashEjercicios = new HashMap<>();
+
+
             Data datos = new Data.Builder().putString("user", logueado.getText().toString()).build();
             OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(phpSelectRutinas.class).setInputData(datos).build();
             WorkManager.getInstance(MainActivity.this).getWorkInfoByIdLiveData(otwr.getId()).observe(MainActivity.this, new Observer<WorkInfo>() {
@@ -227,23 +230,26 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                System.out.println(MainActivity.this.rutinas);
-                String nombreRutina = rutinas.get(i);
 
+                String nombreRutina = rutinas.get(i);
+                System.out.println("PULSASTE EN ----> "+nombreRutina);
+                System.out.println(hashRutinas);
                 if (hashRutinas.get(nombreRutina) == 0) {
                     /*Si la rutina se acaba de crear se lleva al usuario a una interfaz para que añada el primer ejercicio*/
 
                     Intent iEjercicio = new Intent(MainActivity.this, addEjercicio.class);
                     iEjercicio.putExtra("nombreRutina", nombreRutina);
+                    iEjercicio.putExtra("usuario",logueado.getText().toString());
                     iEjercicio.putExtra("numEjer", hashRutinas.get(nombreRutina).toString());
                     startActivityForResult(iEjercicio, 2);
                 } else {
                     /*Si la rutina ya tiene algún ejercicio se lleva al usuario a una interfaz donde aparecen listados los ejericios
                      * y podrá añadir más ejercicios, editarlos y/o borrarlos*/
-
+                    System.out.println(hashRutinas);
                     Intent iVerEditar = new Intent(MainActivity.this, VerEditarRutina.class);
                     System.out.println(nombreRutina);
                     iVerEditar.putExtra("nombreRutina", nombreRutina);
+                    iVerEditar.putExtra("user",logueado.getText().toString());
                     iVerEditar.putExtra("numEjer", hashRutinas.get(nombreRutina).toString());
                     startActivityForResult(iVerEditar, 4);
                 }
@@ -285,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
                 //this.hashRutinas.put(rutina, ejercicios.size());
                 //arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, rutinas);
                 //listView.setAdapter(arrayAdapter);
-
+                inicializarHashMap();
                 Data datos = new Data.Builder().putString("user", logueado.getText().toString()).build();
                 OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(phpSelectRutinas.class).setInputData(datos).build();
                 WorkManager.getInstance(MainActivity.this).getWorkInfoByIdLiveData(otwr.getId()).observe(MainActivity.this, new Observer<WorkInfo>() {
@@ -314,9 +320,10 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 2) {//se ha añadido el primer ejer a la rutina
             if (resultCode == RESULT_OK) {
                 System.out.println("se ha añadido el primer ejer a la rutina");
-                String rutina = data.getStringExtra("rutina");
-                ArrayList<String> ejercicios = gestorBD.getEjercicios(rutina);
-                this.hashRutinas.put(rutina, ejercicios.size());
+                //String rutina = data.getStringExtra("rutina");
+                //ArrayList<String> ejercicios = gestorBD.getEjercicios(rutina);
+                //this.hashRutinas.put(rutina, ejercicios.size());
+                inicializarHashMap();
                 System.out.println(hashRutinas);
                 Data datos = new Data.Builder().putString("user", logueado.getText().toString()).build();
                 OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(phpSelectRutinas.class).setInputData(datos).build();
@@ -393,7 +400,7 @@ public class MainActivity extends AppCompatActivity {
                                 String[] rutinasArray = workInfo.getOutputData().getStringArray("rutinas");
                                 int[] imagenes = {R.drawable.zyzz};
                                 actualizarRutinas(rutinasArray);
-                                System.out.println("ANTES DE INICIALIZAR HASH--> "+rutinas);
+                                System.out.println("ANTES DE INICIALIZAR HASH--> " + rutinas);
                                 inicializarHashMap();
                                 AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(), rutinasArray, imagenes);
                                 listView.setAdapter(arrayAdapter);
@@ -422,9 +429,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void inicializarHashMap() {
-
+        /*Nada más loguearnos se hará un SELECT de las rutinas y sus ejercicos que tenga el usuario almacenados
+        * Se incializa un hashmap con los pares Rutina - numEjercicios */
         for (String rutina : this.rutinas) {
-            Data datos = new Data.Builder().putString("user", logueado.getText().toString()).putString("rutina",rutina).build();
+            System.out.println("-----------------------------------------------"+rutina+"-----------------------------------------------");
+            Data datos = new Data.Builder().putString("user", logueado.getText().toString()).putString("rutina", rutina).build();
             OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(phpSelectEjercicios.class).setInputData(datos).build();
             WorkManager.getInstance(MainActivity.this).getWorkInfoByIdLiveData(otwr.getId()).observe(MainActivity.this, new Observer<WorkInfo>() {
                 @Override
@@ -436,7 +445,17 @@ public class MainActivity extends AppCompatActivity {
                             String[] ejerciciosArray = workInfo.getOutputData().getStringArray("ejercicios");
                             System.out.println("GET EJERCICIOS:");
                             System.out.println(ejerciciosArray[0]);
-                            //hashRutinas.put(rutina, ejerciciosArray.length);
+                            for (int i = 0; i < ejerciciosArray.length; i++) {
+                                if (!ejerciciosArray[i].equals("false")) {
+                                    inicializarEjercicios(rutina, ejerciciosArray[i]);
+                                }
+                            }
+                            if(hashEjercicios.containsKey(rutina)){
+                                hashRutinas.put(rutina,hashEjercicios.get(rutina).size());
+                            }else{
+                                hashRutinas.put(rutina,0);
+                            }
+
                         } else {
                             Toast.makeText(MainActivity.this, "No tiene rutinas", Toast.LENGTH_SHORT).show();
                         }
@@ -448,6 +467,30 @@ public class MainActivity extends AppCompatActivity {
 
         }
         System.out.println(hashRutinas);
+    }
+
+    public void inicializarEjercicios(String rutina, String ejercicio) {
+        /*Se inicializa un HashMap con los valores Rutina - Ejericicios; siendo este una lista del tipo Ejercicio*/
+
+        System.out.println("-----------------------------INICIALIZAR EJERCICIOS-----------------------------");
+        System.out.println(ejercicio);
+        /*Tratamiento de strings para crear instancias del tipo Ejercicio*/
+        String[] sinComas = ejercicio.split(",");
+        ArrayList<String> valores = new ArrayList<>();
+        for (int i = 0; i < sinComas.length; i++) {
+            valores.add(sinComas[i].split(":")[1].replace('"', ' ').trim());
+        }
+        String ultimoValor = valores.get(valores.size() - 1);
+        valores.remove(valores.size() - 1);
+        valores.add(ultimoValor.substring(0, ultimoValor.length() - 2));
+
+        /*Creamos el objeto Ejercicio, lo añadimos a la lista de ejercicios y lo vinculamos con su rutina correspondiente haciendo uso de un HashMap*/
+        String nombre = valores.get(0), usuario = valores.get(5);
+        int numRepes = Integer.parseInt(valores.get(1)), numSeries = Integer.parseInt(valores.get(2)), peso = Integer.parseInt(valores.get(3));
+        Ejercicio nuevoEjericio = new Ejercicio(nombre, rutina, usuario, numRepes, numSeries, peso);
+        this.listaEjercicios.add(nuevoEjericio);
+        this.hashEjercicios.put(rutina, listaEjercicios);
+        System.out.println(this.hashEjercicios);
     }
 
     private void showFABMenu() {
@@ -478,7 +521,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
 
 
 }
