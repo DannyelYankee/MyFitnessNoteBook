@@ -12,6 +12,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.icu.text.SymbolTable;
@@ -63,12 +64,13 @@ public class MainActivity extends AppCompatActivity {
         //fab3 = (FloatingActionButton) findViewById(R.id.fab3);
 
         fab1.setOnClickListener(new View.OnClickListener() {
-            /*Botón para añadir un ºamiento*/
+            /*Botón para añadir un entrenamiento*/
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(MainActivity.this, addRoutine.class);
-                if (log) {
-                    i.putExtra("user", logueado.getText().toString());
+                String user = logueado.getText().toString();
+                if (gestorBD.estaLogueado(user)) {
+                    i.putExtra("user", user);
                 }
                 startActivityForResult(i, 1);
                 closeFABMenu();
@@ -89,19 +91,17 @@ public class MainActivity extends AppCompatActivity {
 
                         /*Preparamos notificación que saldrá con un icono de Warning para avisar de que la BBDD ha sido vaciada por completo*/
 
-                        NotificationManager elManager = (NotificationManager) getSystemService(MainActivity.this.NOTIFICATION_SERVICE);
+                        NotificationManager elManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                         NotificationCompat.Builder elBuilder = new NotificationCompat.Builder(MainActivity.this, "IdCanal");
 
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            NotificationChannel elCanal = new NotificationChannel("CanalBBDD", "Notificacion Eliminar", NotificationManager.IMPORTANCE_DEFAULT);
-                            elManager.createNotificationChannel(elCanal);
-                        }
+                        NotificationChannel elCanal = new NotificationChannel("CanalBBDD", "Notificacion Eliminar",NotificationManager.IMPORTANCE_DEFAULT);
+                        elManager.createNotificationChannel(elCanal);
                         elBuilder.setSmallIcon(R.drawable.ic_baseline_warning_24);
                         elBuilder.setContentTitle("Base de Datos vaciada");
                         elBuilder.setContentText("Se ha vaciado la Base de Datos");
                         elBuilder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
                         elBuilder.setAutoCancel(true);
-                        elManager.notify(1, elBuilder.build());
+                        elManager.notify(1,elBuilder.build());
                     }
                 }).setNegativeButton("No", null).show();
                 closeFABMenu();
@@ -242,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
 
                     Intent iEjercicio = new Intent(MainActivity.this, addEjercicio.class);
                     iEjercicio.putExtra("nombreRutina", nombreRutina);
-                    iEjercicio.putExtra("usuario",logueado.getText().toString());
+                    iEjercicio.putExtra("user",logueado.getText().toString());
                     iEjercicio.putExtra("numEjer", hashRutinas.get(nombreRutina).toString());
                     startActivityForResult(iEjercicio, 2);
                 } else {
@@ -385,7 +385,9 @@ public class MainActivity extends AppCompatActivity {
         }
         if (requestCode == 20) { //Se ha logueado correctamente
             if (resultCode == RESULT_OK) {
+
                 String username = data.getStringExtra("user");
+
                 System.out.println("LOGUEADO --> " + username);
                 logueado.setText(username);
                 btnLogin.setText("Cerrar sesión");
@@ -401,6 +403,7 @@ public class MainActivity extends AppCompatActivity {
                             System.out.println(resultadoPhp);
                             if (resultadoPhp) {
                                 String[] rutinasArray = workInfo.getOutputData().getStringArray("rutinas");
+                                System.out.println("++++++"+rutinasArray+"++++++");
                                 int[] imagenes = {R.drawable.zyzz};
                                 actualizarRutinas(rutinasArray);
                                 System.out.println("ANTES DE INICIALIZAR HASH--> " + rutinas);
@@ -443,11 +446,11 @@ public class MainActivity extends AppCompatActivity {
                 public void onChanged(WorkInfo workInfo) {
                     if (workInfo != null && workInfo.getState().isFinished()) {
                         Boolean resultadoPhp = workInfo.getOutputData().getBoolean("exito", false);
-                        System.out.println(resultadoPhp);
+                        System.out.println("RESULTADO SELEC EJERCICIOS inicializarHash "+resultadoPhp);
                         if (resultadoPhp) {
                             String[] ejerciciosArray = workInfo.getOutputData().getStringArray("ejercicios");
                             System.out.println("GET EJERCICIOS:");
-                            System.out.println(ejerciciosArray[0]);
+
                             for (int i = 0; i < ejerciciosArray.length; i++) {
                                 if (!ejerciciosArray[i].equals("false")) {
                                     inicializarEjercicios(rutina, ejerciciosArray[i]);
@@ -460,7 +463,7 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                         } else {
-                            Toast.makeText(MainActivity.this, "No tiene rutinas", Toast.LENGTH_SHORT).show();
+                            hashRutinas.put(rutina,0);
                         }
                     }
 
@@ -523,6 +526,7 @@ public class MainActivity extends AppCompatActivity {
                 this.rutinas.add(lista[i]);
             }
         }
+        System.out.println("actualizarRutinas --> "+this.rutinas);
     }
 
 

@@ -1,26 +1,20 @@
 package com.example.myfitnessnotebook;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.Observer;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SyncAdapterType;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,7 +29,7 @@ public class VerEditarRutina extends AppCompatActivity {
     String rutina, user;
     ArrayList<Ejercicio> listaEjercicios;
     ArrayAdapter arrayAdapter;
-
+    int cont;
     FloatingActionButton fab;
     FloatingActionButton fab1;
     FloatingActionButton fab2;
@@ -62,7 +56,7 @@ public class VerEditarRutina extends AppCompatActivity {
                 }
             }
         });
-
+        cont = 0;
 
         /*Cargamos los ejercicios de la rutina*/
         listView = (ListView) findViewById(R.id.rutinaConEjer);
@@ -83,7 +77,10 @@ public class VerEditarRutina extends AppCompatActivity {
 
                         for (int i = 0; i < ejerciciosArray.length; i++) {
                             if (!ejerciciosArray[i].equals("false")) {
-                                inicializarEjercicios(rutina, ejerciciosArray[i]);
+                                Ejercicio nuevoEjercicio = getEjercicio(rutina, ejerciciosArray[i]);
+                                if (!listaEjercicios.contains(nuevoEjercicio)) {
+                                    agregarEjercicio(nuevoEjercicio);
+                                }
                             }
                         }
 
@@ -116,7 +113,7 @@ public class VerEditarRutina extends AppCompatActivity {
                                 String nombreRutina = getIntent().getStringExtra("nombreRutina");
                                 String numEjer = getIntent().getStringExtra("numEjer");
                                 Intent i = new Intent(VerEditarRutina.this, addEjercicio.class);
-                                i.putExtra("user",user);
+                                i.putExtra("user", user);
                                 i.putExtra("nombreRutina", nombreRutina);
                                 i.putExtra("numEjer", numEjer);
                                 startActivityForResult(i, 3);
@@ -134,7 +131,7 @@ public class VerEditarRutina extends AppCompatActivity {
                                         for (Ejercicio ejercicio : listaEjercicios) {
                                             //gestorBD.eliminarEjercicio(ejercicio, rutina);
                                             /*Se elimina de la BBDD*/
-                                            Data datos = new Data.Builder().putString("user", ejercicio.getUsuario()).putString("rutina", ejercicio.getRutina()).putString("nombre",ejercicio.getNombre()).build();
+                                            Data datos = new Data.Builder().putString("user", ejercicio.getUsuario()).putString("rutina", ejercicio.getRutina()).putString("nombre", ejercicio.getNombre()).build();
                                             OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(phpEliminarEjercicio.class).setInputData(datos).build();
                                             WorkManager.getInstance(VerEditarRutina.this).getWorkInfoByIdLiveData(otwr.getId()).observe(VerEditarRutina.this, new Observer<WorkInfo>() {
                                                 @Override
@@ -171,8 +168,13 @@ public class VerEditarRutina extends AppCompatActivity {
                                 iVerEditar.putExtra("numRepes", String.valueOf(ejercicio.getNumRepes()));
                                 iVerEditar.putExtra("peso", String.valueOf(ejercicio.getPeso()));
                                 iVerEditar.putExtra("rutina", ejercicio.getRutina());
-                                iVerEditar.putExtra("user",ejercicio.getUsuario());
+                                iVerEditar.putExtra("user", ejercicio.getUsuario());
                                 startActivityForResult(iVerEditar, 10);
+                                if (!isFABOpen) {
+                                    showFABMenu();
+                                } else {
+                                    closeFABMenu();
+                                }
                             }
                         });
                         /*Al clickar un rato en un tiem de la lista se podrá eliminar y saltará una alerta señalándonos lo que va a ocurrir*/
@@ -188,7 +190,7 @@ public class VerEditarRutina extends AppCompatActivity {
                                         Ejercicio ejercicio = listaEjercicios.get(position);
                                         System.out.println(listaEjercicios);
                                         /*Se elimina de la BBDD*/
-                                        Data datos = new Data.Builder().putString("user", ejercicio.getUsuario()).putString("rutina", ejercicio.getRutina()).putString("nombre",ejercicio.getNombre()).build();
+                                        Data datos = new Data.Builder().putString("user", ejercicio.getUsuario()).putString("rutina", ejercicio.getRutina()).putString("nombre", ejercicio.getNombre()).build();
                                         OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(phpEliminarEjercicio.class).setInputData(datos).build();
                                         WorkManager.getInstance(VerEditarRutina.this).getWorkInfoByIdLiveData(otwr.getId()).observe(VerEditarRutina.this, new Observer<WorkInfo>() {
                                             @Override
@@ -227,55 +229,39 @@ public class VerEditarRutina extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 3) {
             if (resultCode == RESULT_OK) {//Se ha añadido un nuevo ejercicio correctamente
-                this.listaEjercicios = new ArrayList<>();
+                //this.listaEjercicios = new ArrayList<>();
+
                 //listaEjercicios = gestorBD.getEjercicios(rutina);
                 String user = data.getStringExtra("user");
                 String rutina = data.getStringExtra("rutina");
-                Data datos = new Data.Builder().putString("user", user).putString("rutina", rutina).build();
-                OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(phpSelectEjercicios.class).setInputData(datos).build();
-                WorkManager.getInstance(VerEditarRutina.this).getWorkInfoByIdLiveData(otwr.getId()).observe(VerEditarRutina.this, new Observer<WorkInfo>() {
+                getEjercicios(user, rutina);
+                System.out.println("SE HA AÑADIDO UN NUEVO EJERCICIO CORRECTAMENTE->" + listaEjercicios);
+                ArrayList<String> listaNombresEjercicios = new ArrayList<>();
+                for (Ejercicio i : listaEjercicios) {
+                    listaNombresEjercicios.add(i.getNombre());
+                }
+                System.out.println(listaNombresEjercicios);
+                arrayAdapter = new ArrayAdapter(VerEditarRutina.this, android.R.layout.simple_list_item_2, android.R.id.text1, listaNombresEjercicios) {
                     @Override
-                    public void onChanged(WorkInfo workInfo) {
-                        if (workInfo != null && workInfo.getState().isFinished()) {
-                            Boolean resultadoPhp = workInfo.getOutputData().getBoolean("exito", false);
-                            System.out.println(resultadoPhp);
-                            if (resultadoPhp) {
-                                String[] ejerciciosArray = workInfo.getOutputData().getStringArray("ejercicios");
-                                for (int i = 0; i < ejerciciosArray.length; i++) {
-                                    if (!ejerciciosArray[i].equals("false")) {
-                                        inicializarEjercicios(rutina, ejerciciosArray[i]);
-                                    }
-                                }
-                                ArrayList<String> listaNombresEjercicios = new ArrayList<>();
-                                for (Ejercicio i : listaEjercicios) {
-                                    listaNombresEjercicios.add(i.getNombre());
-                                }
-                                arrayAdapter = new ArrayAdapter(VerEditarRutina.this, android.R.layout.simple_list_item_2, android.R.id.text1, listaNombresEjercicios) {
-                                    @Override
-                                    public View getView(int position, View convertView, ViewGroup parent) {
-                                        View vista = super.getView(position, convertView, parent);
-                                        TextView lineaPrincipal = (TextView) vista.findViewById(android.R.id.text1);
-                                        TextView lineaSecundaria = (TextView) vista.findViewById(android.R.id.text2);
-                                        Ejercicio ejercicio = listaEjercicios.get(position);
-                                        String nombreEjercicio = ejercicio.getNombre();
-                                        lineaPrincipal.setText(nombreEjercicio);
-                                        //ArrayList<Integer> infoEjercicio = gestorBD.getInfoEjercicio(nombreEjercicio, rutina);
-                                        String info = ejercicio.getNumSeries() + "x" + ejercicio.getNumRepes() + " con " + ejercicio.getPeso() + "Kg";
-                                        lineaSecundaria.setText(info);
-                                        return vista;
-                                    }
-                                };
-                                listView.setAdapter(arrayAdapter);
-                                Intent iBack = new Intent();
-                                iBack.putExtra("rutina", rutina);
-                                setResult(Activity.RESULT_OK, iBack);
-
-                            }
-                        }
+                    public View getView(int position, View convertView, ViewGroup parent) {
+                        View vista = super.getView(position, convertView, parent);
+                        TextView lineaPrincipal = (TextView) vista.findViewById(android.R.id.text1);
+                        TextView lineaSecundaria = (TextView) vista.findViewById(android.R.id.text2);
+                        Ejercicio ejercicio = listaEjercicios.get(position);
+                        String nombreEjercicio = ejercicio.getNombre();
+                        lineaPrincipal.setText(nombreEjercicio);
+                        //ArrayList<Integer> infoEjercicio = gestorBD.getInfoEjercicio(nombreEjercicio, rutina);
+                        String info = ejercicio.getNumSeries() + "x" + ejercicio.getNumRepes() + " con " + ejercicio.getPeso() + "Kg";
+                        lineaSecundaria.setText(info);
+                        return vista;
                     }
-                });
-                WorkManager.getInstance(VerEditarRutina.this).enqueue(otwr);
-
+                };
+                listView.setAdapter(arrayAdapter);
+                if (!isFABOpen) {
+                    showFABMenu();
+                } else {
+                    closeFABMenu();
+                }
             }
         }
         if (requestCode == 10) {
@@ -283,52 +269,33 @@ public class VerEditarRutina extends AppCompatActivity {
                 this.listaEjercicios = new ArrayList<>();
                 String user = data.getStringExtra("user");
                 String rutina = data.getStringExtra("rutina");
-                Data datos = new Data.Builder().putString("user", user).putString("rutina", rutina).build();
-                OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(phpSelectEjercicios.class).setInputData(datos).build();
-                WorkManager.getInstance(VerEditarRutina.this).getWorkInfoByIdLiveData(otwr.getId()).observe(VerEditarRutina.this, new Observer<WorkInfo>() {
+                getEjercicios(user, rutina);
+                ArrayList<String> listaNombresEjercicios = new ArrayList<>();
+                for (Ejercicio i : listaEjercicios) {
+                    listaNombresEjercicios.add(i.getNombre());
+                }
+                System.out.println(listaNombresEjercicios);
+                arrayAdapter = new ArrayAdapter(VerEditarRutina.this, android.R.layout.simple_list_item_2, android.R.id.text1, listaNombresEjercicios) {
                     @Override
-                    public void onChanged(WorkInfo workInfo) {
-                        if (workInfo != null && workInfo.getState().isFinished()) {
-                            Boolean resultadoPhp = workInfo.getOutputData().getBoolean("exito", false);
-                            System.out.println(resultadoPhp);
-                            if (resultadoPhp) {
-                                String[] ejerciciosArray = workInfo.getOutputData().getStringArray("ejercicios");
-                                System.out.println("GET EJERCICIOS:");
-                                System.out.println(ejerciciosArray[0]);
-                                for (int i = 0; i < ejerciciosArray.length; i++) {
-                                    if (!ejerciciosArray[i].equals("false")) {
-                                        inicializarEjercicios(rutina, ejerciciosArray[i]);
-                                    }
-                                }
-                                ArrayList<String> listaNombresEjercicios = new ArrayList<>();
-                                for (Ejercicio i : listaEjercicios) {
-                                    listaNombresEjercicios.add(i.getNombre());
-                                }
-                                arrayAdapter = new ArrayAdapter(VerEditarRutina.this, android.R.layout.simple_list_item_2, android.R.id.text1, listaNombresEjercicios) {
-                                    @Override
-                                    public View getView(int position, View convertView, ViewGroup parent) {
-                                        View vista = super.getView(position, convertView, parent);
-                                        TextView lineaPrincipal = (TextView) vista.findViewById(android.R.id.text1);
-                                        TextView lineaSecundaria = (TextView) vista.findViewById(android.R.id.text2);
-                                        Ejercicio ejercicio = listaEjercicios.get(position);
-                                        String nombreEjercicio = ejercicio.getNombre();
-                                        lineaPrincipal.setText(nombreEjercicio);
-                                        //ArrayList<Integer> infoEjercicio = gestorBD.getInfoEjercicio(nombreEjercicio, rutina);
-                                        String info = ejercicio.getNumSeries() + "x" + ejercicio.getNumRepes() + " con " + ejercicio.getPeso() + "Kg";
-                                        lineaSecundaria.setText(info);
-                                        return vista;
-                                    }
-                                };
-                                listView.setAdapter(arrayAdapter);
-                                Intent iBack = new Intent();
-                                iBack.putExtra("rutina", rutina);
-                                setResult(Activity.RESULT_OK, iBack);
-
-                            }
-                        }
+                    public View getView(int position, View convertView, ViewGroup parent) {
+                        View vista = super.getView(position, convertView, parent);
+                        TextView lineaPrincipal = (TextView) vista.findViewById(android.R.id.text1);
+                        TextView lineaSecundaria = (TextView) vista.findViewById(android.R.id.text2);
+                        Ejercicio ejercicio = listaEjercicios.get(position);
+                        String nombreEjercicio = ejercicio.getNombre();
+                        lineaPrincipal.setText(nombreEjercicio);
+                        //ArrayList<Integer> infoEjercicio = gestorBD.getInfoEjercicio(nombreEjercicio, rutina);
+                        String info = ejercicio.getNumSeries() + "x" + ejercicio.getNumRepes() + " con " + ejercicio.getPeso() + "Kg";
+                        lineaSecundaria.setText(info);
+                        return vista;
                     }
-                });
-                WorkManager.getInstance(VerEditarRutina.this).enqueue(otwr);
+                };
+                listView.setAdapter(arrayAdapter);
+                if (!isFABOpen) {
+                    showFABMenu();
+                } else {
+                    closeFABMenu();
+                }
             }
         }
     }
@@ -347,11 +314,8 @@ public class VerEditarRutina extends AppCompatActivity {
         //fab3.animate().translationY(0);
     }
 
-    public void inicializarEjercicios(String rutina, String ejercicio) {
-        /*Se inicializa un HashMap con los valores Rutina - Ejericicios; siendo este una lista del tipo Ejercicio*/
-        System.out.println("-----------------------------INICIALIZAR EJERCICIOS-----------------------------");
-        System.out.println(ejercicio);
-        /*Tratamiento de strings para crear instancias del tipo Ejercicio*/
+    public Ejercicio getEjercicio(String rutina, String ejercicio) {
+
         String[] sinComas = ejercicio.split(",");
         ArrayList<String> valores = new ArrayList<>();
         for (int i = 0; i < sinComas.length; i++) {
@@ -364,9 +328,63 @@ public class VerEditarRutina extends AppCompatActivity {
         /*Creamos el objeto Ejercicio, lo añadimos a la lista de ejercicios y lo vinculamos con su rutina correspondiente haciendo uso de un HashMap*/
         String nombre = valores.get(0), usuario = valores.get(5);
         int numRepes = Integer.parseInt(valores.get(1)), numSeries = Integer.parseInt(valores.get(2)), peso = Integer.parseInt(valores.get(3));
-        Ejercicio nuevoEjericio = new Ejercicio(nombre, rutina, usuario, numRepes, numSeries, peso);
-        this.listaEjercicios.add(nuevoEjericio);
+        Ejercicio nuevoEjercicio = new Ejercicio(nombre, rutina, usuario, numRepes, numSeries, peso);
+
+        return nuevoEjercicio;
+    }
+
+    public void agregarEjercicio(Ejercicio ejercicio) {
+        /*Se inicializa un HashMap con los valores Rutina - Ejericicios; siendo este una lista del tipo Ejercicio*/
+        System.out.println("-----------------------------INICIALIZAR EJERCICIOS-----------------------------");
+        System.out.println(ejercicio);
+        /*Tratamiento de strings para crear instancias del tipo Ejercicio*/
+
+        if (!tieneEjercicio(ejercicio)) {
+            this.listaEjercicios.add(ejercicio);
+            cont++;
+        }
+
         System.out.println("final-->" + listaEjercicios);
+        System.out.println("cont-->" + cont);
 
     }
+
+    public boolean tieneEjercicio(Ejercicio ejercicio) {
+        boolean tiene = false;
+        for (Ejercicio i : listaEjercicios) {
+            if (i.getNombre().equals(ejercicio.getNombre()) && i.getRutina().equals(ejercicio.getRutina()) && i.getUsuario().equals(ejercicio.getUsuario()) && i.getPeso() == ejercicio.getPeso() && i.getNumRepes() == ejercicio.getNumRepes() && i.getNumSeries() == ejercicio.getNumSeries()) {
+                tiene = true;
+            }
+        }
+        return tiene;
+    }
+
+    public void getEjercicios(String user, String rutina) {
+        Data datos = new Data.Builder().putString("user", user).putString("rutina", rutina).build();
+        OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(phpSelectEjercicios.class).setInputData(datos).build();
+        WorkManager.getInstance(VerEditarRutina.this).getWorkInfoByIdLiveData(otwr.getId()).observe(VerEditarRutina.this, new Observer<WorkInfo>() {
+            @Override
+            public void onChanged(WorkInfo workInfo) {
+                if (workInfo != null && workInfo.getState().isFinished()) {
+                    Boolean resultadoPhp = workInfo.getOutputData().getBoolean("exito", false);
+                    System.out.println(resultadoPhp);
+                    if (resultadoPhp) {
+                        String[] ejerciciosArray = workInfo.getOutputData().getStringArray("ejercicios");
+                        for (int i = 0; i < ejerciciosArray.length; i++) {
+                            if (!ejerciciosArray[i].equals("false")) {
+                                Ejercicio nuevoEjercicio = getEjercicio(rutina, ejerciciosArray[i]);
+                                System.out.println("nuevoEjercicio-> " + nuevoEjercicio.getNombre());
+                                if (!listaEjercicios.contains(nuevoEjercicio)) {
+                                    agregarEjercicio(nuevoEjercicio);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        WorkManager.getInstance(VerEditarRutina.this).enqueue(otwr);
+    }
+
+
 }

@@ -39,7 +39,7 @@ public class SignUpActivity extends AppCompatActivity {
         psswd2Text = (EditText) findViewById(R.id.passwordSU2);
 
 
-
+        gestorBD = new miBD(this, "MyFitnessNotebook", null, 1);
         /*Registramos el usuario en la BBDD*/
         btnSU = (Button) findViewById(R.id.btnLoginSU);
         btnSU.setOnClickListener(new View.OnClickListener() {
@@ -61,6 +61,7 @@ public class SignUpActivity extends AppCompatActivity {
                                     Boolean resultadoPhp = workInfo.getOutputData().getBoolean("exito", false);
                                     System.out.println(resultadoPhp);
                                     if (resultadoPhp) {
+                                        gestorBD.loguearUsuario(username);
                                         Intent i = new Intent();
                                         i.putExtra("user", username);
                                         setResult(Activity.RESULT_OK, i);

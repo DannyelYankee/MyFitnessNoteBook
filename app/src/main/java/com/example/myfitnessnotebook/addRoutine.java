@@ -76,6 +76,7 @@ public class addRoutine extends AppCompatActivity {
                         //System.out.println("INSERTAR Ejercicios --> LOGUEADO");
                         Data datos = new Data.Builder().putString("user", user).putString("rutina", nombreRutina).build();
                         OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(phpInsertRutina.class).setInputData(datos).build();
+                        System.out.println("INSERT Rutina --> "+user+" "+nombreRutina);
                         WorkManager.getInstance(addRoutine.this).getWorkInfoByIdLiveData(otwr.getId()).observe(addRoutine.this, new Observer<WorkInfo>() {
                             @Override
                             public void onChanged(WorkInfo workInfo) {

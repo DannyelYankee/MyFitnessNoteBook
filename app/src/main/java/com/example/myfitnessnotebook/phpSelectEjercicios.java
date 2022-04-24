@@ -39,8 +39,7 @@ public class phpSelectEjercicios extends Worker {
             urlConnection.setConnectTimeout(5000);
             urlConnection.setReadTimeout(5000);
             Uri.Builder builder = new Uri.Builder().appendQueryParameter("user", user).appendQueryParameter("rutina",rutina);
-            System.out.println("PARAMETROS phpSelectEjercicios--> "+user);
-            System.out.println("PARAMETROS phpSelectEjercicios--> "+rutina);
+            System.out.println("PARAMETROS phpSelectEjercicios--> "+user+ " ,"+rutina);
             String parametros = builder.build().getEncodedQuery();
             urlConnection.setRequestMethod("POST");
             urlConnection.setDoOutput(true);
@@ -70,9 +69,9 @@ public class phpSelectEjercicios extends Worker {
                     ejercicios.add(jsonArray.getJSONObject(i).getString("resultado"));
                     //js = jsonArray.getJSONObject(i).getJSONArray("resultado");
                 }
-                System.out.println(ejercicios);
+                System.out.println("SELECT EJERCICIOS-> " +ejercicios);
                 Data datos;
-                if (ejercicios.size()==0) {
+                if (ejercicios.contains("false")) {
                     datos = new Data.Builder().putBoolean("exito", false).build();
                 } else {
                     String[] ejerciciosArray = ejercicios.toArray(new String[ejercicios.size()]);

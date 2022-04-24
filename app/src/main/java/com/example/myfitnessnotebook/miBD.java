@@ -28,6 +28,7 @@ public class miBD extends SQLiteOpenHelper {
         /*Tabla Rutina:
          * nombre */
         sqLiteDatabase.execSQL("CREATE TABLE Rutinas ('nombre' VARCHAR(255) PRIMARY KEY NOT NULL)");
+        sqLiteDatabase.execSQL("CREATE TABLE Usuario ('nombre' VARCHAR(255) PRIMARY KEY NOT NULL, 'logueado' VARCHAR(255))");
 
         /*Tabla Ejercicio:
          * nombre    numSeries   numRepes    peso   */
@@ -39,6 +40,34 @@ public class miBD extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
 
+    }
+
+    public void loguearUsuario(String user) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("nombre", user);
+        values.put("logueado", "true");
+        long newRowId = db.insert("Usuario", null, values);
+        db.close();
+    }
+
+    public boolean estaLogueado(String user) {
+        boolean esta = false;
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM Usuario WHERE nombre= ?";
+        Cursor c = db.rawQuery(query, new String[]{user});
+        String logueado = "";
+        while (c.moveToNext()) {
+            int i = c.getColumnIndex("logueado");
+            logueado = c.getString(i);
+        }
+        if (logueado.equals("true")) {
+            esta = true;
+        }
+        System.out.println(esta);
+        c.close();
+        db.close();
+        return esta;
     }
 
     public ArrayList<String> getRutinas() {
@@ -90,7 +119,7 @@ public class miBD extends SQLiteOpenHelper {
 
     public ArrayList<Integer> getInfoEjercicio(String ejercicio, String rutina) {
         /*Dado el nombre de un ejercicio y el nombre de la rutina a la que pertenece:
-        * devuelve una lista con los datos de dicho ejercicio: nº series, nº repeticiones y peso*/
+         * devuelve una lista con los datos de dicho ejercicio: nº series, nº repeticiones y peso*/
         ArrayList<Integer> info = new ArrayList<Integer>();
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM Ejercicios WHERE nombre= ? AND rutina= ?";
@@ -123,22 +152,25 @@ public class miBD extends SQLiteOpenHelper {
         Log.i("agregarEjercicio", "agregado");
         db.close();
     }
-    public void eliminarEjercicio(String nombreEjer, String rutina){
+
+    public void eliminarEjercicio(String nombreEjer, String rutina) {
         //Elimina un ejercicio en específico perteneciente a una rutina en concreto
-        int id = this.getID(nombreEjer,rutina);
+        int id = this.getID(nombreEjer, rutina);
         SQLiteDatabase db = this.getWritableDatabase();
-        System.out.println("id de "+nombreEjer+"--->"+id);
-        db.delete("Ejercicios","id=?",new String[]{String.valueOf(id)});
+        System.out.println("id de " + nombreEjer + "--->" + id);
+        db.delete("Ejercicios", "id=?", new String[]{String.valueOf(id)});
         db.close();
     }
-    public void eliminarRutina(String rutina){
+
+    public void eliminarRutina(String rutina) {
         //Elimina una rutina de la BBDD
-        SQLiteDatabase db = this .getWritableDatabase();
+        SQLiteDatabase db = this.getWritableDatabase();
         /*Primero eliminamos todos los ejercicios relacionados con la rutina*/
-        db.delete("Ejercicios","rutina=?",new String[]{rutina});
-        db.delete("Rutinas","nombre=?",new String[]{rutina});
+        db.delete("Ejercicios", "rutina=?", new String[]{rutina});
+        db.delete("Rutinas", "nombre=?", new String[]{rutina});
         db.close();
     }
+
     public int getID(String ejercicio, String rutina) {
         //Dado el nombre de un ejercicio y el de la rutina a la que pertence, devuelve el id de dicha row de la BBDD
         SQLiteDatabase db = this.getReadableDatabase();
@@ -151,6 +183,7 @@ public class miBD extends SQLiteOpenHelper {
         }
         return id;
     }
+
     public void editarEjercicio(String nombreOriginal, String nombreEjer, int series, int repeticiones, int peso, String nombreRutina) {
         //Actualiza en la BBDD los datos de un ejercicio
         SQLiteDatabase db = this.getWritableDatabase();

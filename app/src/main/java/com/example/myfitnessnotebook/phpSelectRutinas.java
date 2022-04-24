@@ -64,10 +64,12 @@ public class phpSelectRutinas extends Worker {
                     rutinas.add(jsonArray.getJSONObject(i).getString("resultado"));
                 }
                 System.out.println(rutinas);
+
                 Data datos;
-                if (rutinas.size()==0) {
+                if (rutinas.contains("false")) {
                     datos = new Data.Builder().putBoolean("exito", false).build();
                 } else {
+                    System.out.println("SELECT RUTINAS -> "+rutinas);
                     String[] rutinasArray = rutinas.toArray(new String[rutinas.size()]);
                     datos = new Data.Builder().putBoolean("exito", true).putStringArray("rutinas",rutinasArray).build();
                 }

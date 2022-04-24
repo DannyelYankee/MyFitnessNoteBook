@@ -50,7 +50,7 @@ public class addEjercicio extends AppCompatActivity {
         nombreRutina.setText(nombreRutinaExtra);
         String numEjerExtra = getIntent().getStringExtra("numEjer");
         ArrayList<String> numEjercicios = gestorBD.getEjercicios(nombreRutinaExtra);
-        numEjer.setText(String.valueOf(numEjercicios.size()));
+        //numEjer.setText(numEjerExtra);
         btn_addEjer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -76,8 +76,9 @@ public class addEjercicio extends AppCompatActivity {
                         public void onChanged(WorkInfo workInfo) {
                             if (workInfo != null && workInfo.getState().isFinished()) {
                                 Boolean resultadoPhp = workInfo.getOutputData().getBoolean("exito", false);
-                                System.out.println(resultadoPhp);
+                                System.out.println("ADD EJERCICIO--> "+resultadoPhp);
                                 if (resultadoPhp) {
+
                                     Intent iBack = new Intent();
                                     iBack.putExtra("rutina", nombreRutinaExtra);
                                     iBack.putExtra("user",usuario);
