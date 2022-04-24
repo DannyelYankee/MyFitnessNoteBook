@@ -141,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
         /*List view para mostrar las rutinas creadas dinámicamente SIN ESTAR LOGUEADO*/
         listView = findViewById(R.id.listViewRutinas);
         rutinas = new ArrayList<>();
+
         if (!log) {
             System.out.println("no loguoese");
             /*
@@ -214,6 +215,8 @@ public class MainActivity extends AppCompatActivity {
                         if (resultadoPhp) {
                             String[] rutinasArray = workInfo.getOutputData().getStringArray("rutinas");
                             actualizarRutinas(rutinasArray);
+                            System.out.println("ANTES DE INICIALIZAR->"+rutinas);
+                            inicializarHashMap();
                             int[] imagenes = {R.drawable.zyzz};
                             AdaptadorListViewRutinas arrayAdapter = new AdaptadorListViewRutinas(getApplicationContext(), rutinasArray, imagenes);
                             listView.setAdapter(arrayAdapter);

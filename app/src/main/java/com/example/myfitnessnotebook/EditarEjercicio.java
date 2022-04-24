@@ -1,12 +1,19 @@
 package com.example.myfitnessnotebook;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class EditarEjercicio extends AppCompatActivity {
 
@@ -67,11 +74,29 @@ public class EditarEjercicio extends AppCompatActivity {
                 int series = Integer.parseInt(seriesEditado);
                 int repes = Integer.parseInt(repesEditado);
                 int peso = Integer.parseInt(pesoEditado);
-                gestorBD.editarEjercicio(nombreExtra,nombreEditado, series, repes, peso, rutinaExtra);
-                Intent iBack = new Intent();
-                setResult(RESULT_OK);
-                finish();
 
+                String user = getIntent().getStringExtra("user");
+                String rutina = getIntent().getStringExtra("rutina");
+                Data datos = new Data.Builder().putString("nombreExtra",nombreExtra).putString("user", user).putInt("numSeries",series).putInt("numRepes",repes).putInt("peso",peso).putString("nombre",nombreEditado).putString("rutina",rutina).build();
+                OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(phpUpdateEjercicio.class).setInputData(datos).build();
+                WorkManager.getInstance(EditarEjercicio.this).getWorkInfoByIdLiveData(otwr.getId()).observe(EditarEjercicio.this, new Observer<WorkInfo>() {
+                    @Override
+                    public void onChanged(WorkInfo workInfo) {
+                        if (workInfo != null && workInfo.getState().isFinished()) {
+                            Boolean resultadoPhp = workInfo.getOutputData().getBoolean("exito", false);
+                            System.out.println(resultadoPhp);
+                            if (resultadoPhp) {
+                                Intent iBack = new Intent();
+                                iBack.putExtra("user",user);
+                                iBack.putExtra("rutina",rutina);
+                                setResult(Activity.RESULT_OK,iBack);
+                                finish();
+                            }
+                        }
+                    }
+                });
+                WorkManager.getInstance(EditarEjercicio.this).enqueue(otwr);
+                //gestorBD.editarEjercicio(nombreExtra,nombreEditado, series, repes, peso, rutinaExtra);
             }
         });
 

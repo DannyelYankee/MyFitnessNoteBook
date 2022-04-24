@@ -20,9 +20,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class phpEliminarEjercicio extends Worker {
-
-    public phpEliminarEjercicio(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+public class phpUpdateEjercicio extends Worker {
+    public phpUpdateEjercicio(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
 
@@ -32,17 +31,21 @@ public class phpEliminarEjercicio extends Worker {
         String user = getInputData().getString("user");
         String rutina = getInputData().getString("rutina");
         String nombre = getInputData().getString("nombre");
-        System.out.println("DELETE EJERCICIO PARAMETROS:");
-        System.out.println("user->"+user+" rutina->"+rutina+" nombre->"+nombre);
+        String nombreExtra = getInputData().getString("nombreExtra");
+        int numSeries = getInputData().getInt("numSeries",-1);
+        int numRepes = getInputData().getInt("numRepes",-1);
+        int peso = getInputData().getInt("peso",-1);
+        System.out.println("UPDATE EJERCICIO PARAMETROS:");
+        System.out.println("user->"+user+" rutina->"+rutina+" nombre->"+nombre+" nombreExtra->"+nombreExtra+" numSeries->"+numSeries+" numRepes->"+numRepes+" peso->"+peso);
 
-        String server = "http://ec2-52-56-170-196.eu-west-2.compute.amazonaws.com/djuape001/WEB/eliminarEjercicio.php";
+        String server = "http://ec2-52-56-170-196.eu-west-2.compute.amazonaws.com/djuape001/WEB/updateEjercicio.php";
         HttpURLConnection urlConnection = null;
         try {
             URL destino = new URL(server);
             urlConnection = (HttpURLConnection) destino.openConnection();
             urlConnection.setConnectTimeout(5000);
             urlConnection.setReadTimeout(5000);
-            Uri.Builder builder = new Uri.Builder().appendQueryParameter("user", user).appendQueryParameter("rutina", rutina).appendQueryParameter("nombre", nombre);
+            Uri.Builder builder = new Uri.Builder().appendQueryParameter("user", user).appendQueryParameter("rutina", rutina).appendQueryParameter("nombre", nombre).appendQueryParameter("nombreExtra",nombreExtra).appendQueryParameter("numSeries", String.valueOf(numSeries)).appendQueryParameter("numRepes", String.valueOf(numRepes)).appendQueryParameter("peso", String.valueOf(peso));
             String parametros = builder.build().getEncodedQuery();
             urlConnection.setRequestMethod("POST");
             urlConnection.setDoOutput(true);
@@ -69,7 +72,7 @@ public class phpEliminarEjercicio extends Worker {
                 }
 
                 Data datos;
-                System.out.println("DELETE EJERCICIO--> "+resultado);
+                System.out.println("UPDATE EJERCICIO--> "+resultado);
                 if (resultado.equals("false")) {
                     datos = new Data.Builder().putBoolean("exito", false).build();
                 } else {

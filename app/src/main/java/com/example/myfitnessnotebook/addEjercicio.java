@@ -64,7 +64,7 @@ public class addEjercicio extends AppCompatActivity {
                     int repes = Integer.parseInt(repeticiones.getText().toString());
                     int pesoKG = Integer.parseInt(peso.getText().toString());
                     String rutina = getIntent().getStringExtra("nombreRutina");
-                    String usuario = getIntent().getStringExtra("usuario");
+                    String usuario = getIntent().getStringExtra("user");
 
                     /*Se agrega el ejercicio a la BBDD*/
                     //gestorBD.agregarEjercicio(nombreEjercicio, numSeries, repes, pesoKG, rutina);
@@ -80,6 +80,7 @@ public class addEjercicio extends AppCompatActivity {
                                 if (resultadoPhp) {
                                     Intent iBack = new Intent();
                                     iBack.putExtra("rutina", nombreRutinaExtra);
+                                    iBack.putExtra("user",usuario);
                                     setResult(Activity.RESULT_OK, iBack);
                                     finish();
                                 }
